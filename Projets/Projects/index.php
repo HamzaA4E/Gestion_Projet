@@ -43,7 +43,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 <div class="d-flex">
     <i class="fa-solid fa-folder"></i>
-    <a href="/Gestion_Projet/Group_Project/Projects/index.php" 
+    <a href="/Gestion_Projet/Projets/Projects/index.php" 
        class="Projects fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Projects
@@ -51,7 +51,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 <div class="d-flex" id="tasksBtn">
     <i class="fa-solid fa-square-check"></i>
-    <a href="/Gestion_Projet/Prj2/index.php" 
+    <a href="/Gestion_Projet/Tasks/index.php" 
        class="Tasks fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Tasks
@@ -59,7 +59,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 <div class="d-flex">
     <i class="fa-solid fa-gauge"></i>
-    <a href="/Gestion_Projet/Dasboard/profile.php" 
+    <a href="/Gestion_Projet/Dashboard/profile.php" 
        class="Settings fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Settings

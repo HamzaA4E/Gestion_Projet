@@ -97,7 +97,7 @@ $pending_invitations = getPendingInvitations($user_id);
                     <li class="nav-item" style="margin-left: -10px;"><a href="dashboard.php" id="link1" class="nav-link text-dark active">Home</a></li>
                     <div class="d-flex">
     <i class="fa-solid fa-folder"></i>
-    <a href="/Gestion_Projet/Group_Project/Projects/index.php" 
+    <a href="/Gestion_Projet/Group_Project/Projets/index.php" 
        class="Projects fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Projects
@@ -105,7 +105,7 @@ $pending_invitations = getPendingInvitations($user_id);
 </div>
 <div class="d-flex" id="tasksBtn">
     <i class="fa-solid fa-square-check"></i>
-    <a href="/Gestion_Projet/Prj2/index.php" 
+    <a href="/Gestion_Projet/Tasks/index.php" 
        class="Tasks fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Tasks
