@@ -1,0 +1,326 @@
+body {
+    background-color: #f0f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.sidebar {
+    width: 220px;
+    background-color: #ffffff;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+}
+
+.main-content {
+    margin-left: 220px;
+    padding: 20px;
+}
+
+.navbar {
+    width: 100%;
+    position: relative;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.16);
+    background-color: #fff;
+    height: 70px;
+    }
+
+.brand {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.brand-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 10px;
+}
+
+.brand-text {
+    font-weight: 600;
+    font-size: 18px;
+    color: #333;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.menu-item:hover, .menu-item.active {
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.menu-item i {
+    margin-right: 10px;
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.project-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f2f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-completed {
+    background-color: #e6f7e6;
+    color: #28a745;
+}
+
+.project-card-body {
+    padding: 20px;
+}
+
+.project-desc {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.project-deadline {
+    color: #dc3545;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.project-team {
+    display: flex;
+    align-items: center;
+}
+
+.team-member {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    margin-right: -8px;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #666;
+}
+
+.team-member img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.issues-count {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.pagination {
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.page-item.active .page-link {
+    background-color: #1e557c;
+    border-color: #1e557c;
+}
+
+.page-link {
+    color: #1e557c;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding-left: 40px;
+    border-radius: 20px;
+    border: 1px solid #9a93b3;
+    background-color: #f4f6ff;
+    width: 350px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 10px;
+    color: #adb5bd;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-info {
+    text-align: right;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.user-location {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+.row{
+    margin-bottom: 94px;
+}
+
+.notifications {
+    font-size: larger;
+    margin-left: 10px;
+}
+
+.btn-create { 
+    background: #1e557c; 
+    color: white; 
+    border-radius: 8px; 
+    padding: 12px 24px; 
+}
+
+
+/* Form Styling */
+.card {
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e0e0e0;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: none;
+}
+
+.form-control-lg {
+    font-size: 1.1rem;
+}
+
+.btn {
+    transition: all 0.3s ease;
+    padding: 8px 20px;
+}
+
+.btn-primary {
+    background-color: #1e557c;
+    border-color: #1e557c;
+}
+
+.btn-primary:hover {
+    background-color: #15405c;
+    border-color: #15405c;
+}
+
+.edit-button {
+    color: #1e557c;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+    padding: 5px;
+}
+
+.edit-button:hover {
+    color: #15405c;
+    text-decoration: none;
+}
+
+/* Status Badges */
+.status-badge {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-ongoing { background-color: #dc3545; color: white; }
+.status-onhold { background-color: #ffc107; color: black; }
+.status-completed { background-color: #198754; color: white; }
+
+/* Team Member Display */
+.team-member-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.member-icon {
+    font-size: 1.2rem;
+    color: #1e557c;
+}
+
+.scrollable-checkbox-group {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+}

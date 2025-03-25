@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Chemins corrigés pour les fichiers CSS -->
+    <link rel="stylesheet" href="./Boostarp/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./Boostarp/css/all.min.css" />
+    <link rel="stylesheet" href="./css/index.css">
+    <title>AProjectO</title>
+    <style>
+        /* Ajoutez vos styles CSS ici */
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar justify-content-between container-fluid py-2">
+        <a class="navbar-brand fs-3" href="#">AProjectO</a>
+        <form class="form-inline d-flex gap-2">
+            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-dark" type="submit">Search</button>
+        </form>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="d-flex flex-lg-row flex-column">
+        <!-- Sidebar -->
+        <div class="sidebar px-3">
+            <ul class="ulSidebar">
+                <li class="d-flex align-items-center">
+                    <i class="fa-solid fa-pen me-2"></i>
+                    <span class="fs-5 fw-bold">Projects</span>
+                </li>
+                <li class="d-flex align-items-center">
+                    <i class="fa-solid fa-square-check me-2"></i>
+                    <span class="fs-5 fw-bold">Tasks</span>
+                </li>
+                <li class="d-flex align-items-center">
+                    <i class="fa-solid fa-heart me-2"></i>
+                    <span class="fs-5 fw-bold">Favoris</span>
+                </li>
+                <li class="d-flex align-items-center">
+                    <i class="fa-solid fa-gear me-2"></i>
+                    <span class="fs-5 fw-bold">Settings</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Content -->
+        <div class="Content w-100">
+            <div class="d-flex align-items-center justify-content-between pt-5">
+                <h5 class="ms-2 text-black-50">Tasks</h5>
+                <select aria-label="Type de vue" class="me-5 select-view" id="viewSelector">
+                    <option value="colonne">Colonne</option>
+                    <option value="liste">Liste</option>
+                </select>
+            </div>
+
+            <!-- Overview Section -->
+            <div class="Overview d-flex flex-wrap mt-4 ps-lg-5 ps-3 justify-content-between align-items-center position-relative mb-5">
+                <h4>Overview</h4>
+                <div class="d-none d-md-flex me-3">
+                    <form class="form-inline d-flex gap-2" onsubmit="searchTasks(event)">
+                        <input id="searchInput" class="form-control" type="search" placeholder="Search Projects" aria-label="Search">
+                        <button class="btn btn-outline-dark" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Task Status Columns -->
+            <div class="status mt-4 ps-lg-3 ps-2 pe-lg-3 pe-2 row mx-0">
+                <!-- Backlog Column -->
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="Backlog shadow-sm rounded-3">
+                        <h4 class="p-3 rounded-top-3">Backlog</h4>
+                        <div class="p-3 task-container">
+                            <!-- Bouton pour ouvrir le popup -->
+                            <div class="add-task-btn">
+                                <div class="b6 d-flex fs-2 align-items-center justify-content-center rounded-3" data-bs-toggle="modal" data-bs-target="#taskPopup">+</div>
+                            </div>
+
+                            <!-- Tâches existantes -->
+                            <div class="task mt-4 p-3 rounded-4" draggable="true" ondragstart="drag(event)" id="task1">
+                                <div class="TaskHead d-flex justify-content-between">
+                                    <h5 class="mb-0">Food Research</h5>
+                                    <p class="mb-0"><i class="fa-regular fa-clock me-1"></i>12 Days</p>
+                                </div>
+                                <div class="my-2">
+                                    <p class="mb-1">Food design is required for our new project. Let's research the best practices.</p>
+                                </div>
+                                <div class="d-flex gap-4 align-items-center">
+                                    <p class="mb-0"><i class="fa-solid fa-paperclip me-1"></i> 5</p>
+                                    <p class="mb-0"><i class="fa-regular fa-comment-dots me-1"></i> 9</p>
+                                    <i class="fa-solid fa-user-plus ms-auto"></i>
+                                    <div class="d-flex flex-column gap-1">
+                                        <i class="fa-solid fa-arrow-up move-up" onclick="moveTaskUp(this)"></i>
+                                        <i class="fa-solid fa-arrow-down move-down" onclick="moveTaskDown(this)"></i>
+                                        <i class="fa-solid fa-trash delete-task" onclick="deleteTask('task1')"></i>
+                                    </div>
+                                </div>
+                                <div class="comment-list mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- In Progress Column -->
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="InProgress shadow-sm rounded-3">
+                        <h4 class="p-3 rounded-top-3">In Progress</h4>
+                        <div class="p-3 task-container">
+                            <!-- Tâches existantes -->
+                            <div class="task mt-4 p-3 rounded-4" draggable="true" ondragstart="drag(event)" id="task3">
+                                <div class="TaskHead d-flex justify-content-between">
+                                    <h5 class="mb-0">API Development</h5>
+                                    <p class="mb-0"><i class="fa-regular fa-clock me-1"></i>8 Days</p>
+                                </div>
+                                <div class="my-2">
+                                    <p class="mb-1">Food design is required for our new project. Let's research the best practices.</p>
+                                </div>
+                                <div class="d-flex gap-4 align-items-center">
+                                    <p class="mb-0"><i class="fa-solid fa-paperclip me-1"></i> 5</p>
+                                    <p class="mb-0"><i class="fa-regular fa-comment-dots me-1"></i> 9</p>
+                                    <i class="fa-solid fa-user-plus ms-auto"></i>
+                                    <div class="d-flex flex-column gap-1">
+                                        <i class="fa-solid fa-arrow-up move-up" onclick="moveTaskUp(this)"></i>
+                                        <i class="fa-solid fa-arrow-down move-down" onclick="moveTaskDown(this)"></i>
+                                        <i class="fa-solid fa-trash delete-task" onclick="deleteTask('task3')"></i>
+                                    </div>
+                                </div>
+                                <div class="comment-list mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Column -->
+                <div class="col-lg-4 col-md-12 col-sm-12 mb-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="Completed shadow-sm rounded-3">
+                        <h4 class="p-3 rounded-top-3">Completed</h4>
+                        <div class="p-3 task-container">
+                            <!-- Tâches existantes -->
+                            <div class="task mt-4 p-3 rounded-4" draggable="true" ondragstart="drag(event)" id="task5">
+                                <div class="TaskHead d-flex justify-content-between">
+                                    <h5 class="mb-0">Requirements Gathering</h5>
+                                    <p class="mb-0"><i class="fa-regular fa-clock me-1"></i>0 Days</p>
+                                </div>
+                                <div class="my-2">
+                                    <p class="mb-1">Food design is required for our new project. Let's research the best practices.</p>
+                                </div>
+                                <div class="d-flex gap-4 align-items-center">
+                                    <p class="mb-0"><i class="fa-solid fa-paperclip me-1"></i> 5</p>
+                                    <p class="mb-0"><i class="fa-regular fa-comment-dots me-1"></i> 9</p>
+                                    <i class="fa-solid fa-user-plus ms-auto"></i>
+                                    <div class="d-flex flex-column gap-1">
+                                        <i class="fa-solid fa-arrow-up move-up" onclick="moveTaskUp(this)"></i>
+                                        <i class="fa-solid fa-arrow-down move-down" onclick="moveTaskDown(this)"></i>
+                                        <i class="fa-solid fa-trash delete-task" onclick="deleteTask('task5')"></i>
+                                    </div>
+                                </div>
+                                <div class="comment-list mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup (Modal) pour créer une tâche -->
+    <div class="modal fade" id="taskPopup" tabindex="-1" aria-labelledby="taskPopupLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Header du popup -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskPopupLabel">Créer une nouvelle tâche</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Corps du popup -->
+                <div class="modal-body">
+                    <!-- Formulaire de création de tâche -->
+                    <form id="taskForm" action="./php/save_task.php" method="POST">
+                        <!-- Titre de la tâche -->
+                        <input type="hidden" name="status" value="Backlog">
+                        <div class="task-header">
+                            <h3>Titre</h3>
+                            <input type="text" name="title" placeholder="Titre de la tâche" required>
+                            <div class="deadline-container">
+                                <span class="deadline-label">Deadline:</span>
+                                <input type="date" name="deadline" class="deadline-date" id="task-deadline" required>
+                                <input type="time" name="deadline_time" class="deadline-time" id="task-deadline-time" required>
+                            </div>
+                        </div>
+                
+                        <!-- Form fields -->
+                        <div class="form-fields">
+                            <!-- Form fields content -->
+                        </div>
+                        
+                        <!-- Attachments section -->
+                        <div class="attachments">
+                            <div class="section-title">Attachments:</div>
+                            
+                            <div class="add-attachment">
+                                <label for="file-input" class="add-icon">+</label>
+                                <input type="file" id="file-input" name="file" style="display: none;">
+                            </div>
+                        </div>
+                        
+                        <!-- Description section -->
+                        <div class="description">
+                            <div class="section-title">Description</div>
+                            <div class="description-text">
+                                <textarea id="description" name="description" placeholder="Ajouter description" required></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Comment section -->
+                        <div id="commentDisplay" class="comment-display mb-3">
+                            <!-- Les commentaires seront ajoutés ici dynamiquement -->
+                        </div>
+                        
+                        <div class="comment-box">
+                            <img src="./img.png" alt="Commenter Avatar" class="commenter-avatar">
+                            <div class="comment-input-container">
+                                <div class="comment-toolbar">
+                                    <button class="Bold-button">B</button>
+                                    <button class="Italic-button">I</button>
+                                    <button class="Underline-button">U</button>
+                                    <button class="toolbar-button">≡</button>
+                                    <button class="toolbar-button">#</button>
+                                </div>
+                                <div class="comment-input">
+                                    <div id="comment" contenteditable="true" placeholder="Ajouter un commentaire..."></div>
+                                </div>
+                                <!-- Bouton pour envoyer le commentaire -->
+                                <button id="sendCommentButton" class="btn btn-primary mt-2">Envoyer</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Action buttons -->
+                        <div class="action-buttons">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./Boostarp/js/bootstrap.bundle.min.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>

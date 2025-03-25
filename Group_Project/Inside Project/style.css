@@ -1,0 +1,590 @@
+body {
+    background-color: #f0f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.sidebar {
+    width: 220px;
+    background-color: #ffffff;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+}
+
+.main-content {
+    margin-left: 220px;
+    padding: 20px 75px 0px 75px;
+}
+
+.navbar {
+    width: 100%;
+    position: relative;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.16);
+    background-color: #fff;
+    height: 70px;
+    }
+
+.brand {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.brand-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 10px;
+}
+
+.brand-text {
+    font-weight: 600;
+    font-size: 18px;
+    color: #333;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.menu-item:hover, .menu-item.active {
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.menu-item i {
+    margin-right: 10px;
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.project-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f2f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-completed {
+    background-color: #e6f7e6;
+    color: #28a745;
+}
+
+.project-card-body {
+    padding: 20px;
+}
+
+.project-desc {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.project-deadline {
+    color: #dc3545;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.project-team {
+    display: flex;
+    align-items: center;
+}
+
+.team-member {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    margin-right: -8px;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 12px;
+}
+
+.team-member img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.issues-count {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.pagination {
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.page-item.active .page-link {
+    background-color: #1e557c;
+    border-color: #1e557c;
+}
+
+.page-link {
+    color: #1e557c;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding-left: 40px;
+    border-radius: 20px;
+    border: 1px solid #9a93b3;
+    background-color: #f4f6ff;
+    width: 350px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 10px;
+    color: #adb5bd;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-info {
+    text-align: right;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.user-location {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+.row{
+    margin-bottom: 94px;
+}
+
+.notifications {
+    font-size: larger;
+    margin-left: 10px;
+}
+
+.path{
+    font-size: 20px;
+    font-weight: 600;
+    font-family: "Nunito", sans-serif;
+    color: #9a93b3;
+}
+.project_title{
+    font-size: 30px;
+    font-weight: 600;
+    font-family: "Nunito", sans-serif;
+    color: #0e2040;
+    margin-right: 15px;
+    margin-bottom: 0px;
+}
+
+.Arrow{
+    padding: 0px 5px 0px 15px;
+    width: 60px;
+    height: 13px;
+}
+
+.btn {
+    border-radius: 8px;
+    background: #F0F6FF;
+    box-shadow: 0px 3px 30px 0px rgba(0, 0, 0, 0.08);
+    width: 200px;
+    color: #6F6F70;
+    border: none;
+    height: 45px;
+}
+.dropdown {
+    display: flex;
+    align-items: flex-end;
+    margin-right: 20px;
+}
+
+.header_container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 35px;
+}
+
+.right_container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.deadline p {
+    text-align: center;
+    margin-top: 33px;
+    margin-bottom: 8px;
+    color: #656565;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.deadline span {
+    font-size: medium;
+    background-color: #f7e6e6;
+    color: #c50000;
+}
+
+.tasks_container {
+    display: flex;
+    width: 100%;
+    height: 670px; /* Fixed height to trigger scrolling */
+    padding: 24px 42px 16.096px 43px;
+    flex-direction: column;
+    border-radius: 15px;
+    background: #FFF;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f0f0f0;
+  }
+  
+.tasks_container::-webkit-scrollbar {
+    width: 10px;
+    border-radius: 15px;
+  }
+  
+  .tasks_container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 15px;
+    margin: 24px 0;
+  }
+  
+  .tasks_container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 15px;
+    border: 2px solid #f1f1f1;
+  }
+  
+  .tasks_container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+.task_card {
+    margin-bottom: 25px;
+    border-radius: 20px;
+    height: 101px;
+    width: 100%;
+    background: #ffffff;
+    padding: 10px 25px 10px 25px;
+    box-shadow: 0px 3px 30px 0px rgba(0, 0, 0, 0.215);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card_left_container {
+    display: flex;
+}
+
+.card_left_container img {
+    margin-right: 20px;
+}
+
+.card_left_container p {
+    color: #000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.card_left_container span {
+    font-size: medium;
+}
+
+.card_middle_container {
+    display: flex;
+    text-align: center;
+    color: #555252;
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+}
+
+.start_date {
+    margin-right: 20px;
+}
+
+.start_date_value,
+.end_date_value {
+    display: flex;
+    align-items: center;
+}
+
+.start_date_value p,
+.end_date_value p {
+    padding-top: 17.5px;
+}
+
+.edate,
+.sdate{
+    margin-bottom: -15px;
+}
+
+.card_right_container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.profile_photo {
+    margin-left: 15px;
+    width: 40px;
+    height: 40px;
+}
+
+.card_right_container span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: larger;
+    background-color: #7700ff1e;
+    color: #000;
+}
+
+.time-left {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+}
+
+.kanban_view {
+    gap: 3%;
+    display: flex;
+    height: 100%;
+}
+
+.to_do_colone,
+.doing_colone,
+.done_colone {
+    height: fit-content;
+    width: 100%;
+    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    min-height: 200px; /* Add minimum height */
+}
+
+.colone_header {
+    height: 7%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background: #F0F6FF;
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    border-radius: 8px;
+}
+
+.kanban_card_container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    flex-grow: 1;
+    min-height: 100px;
+    transition: min-height 0.3s ease;
+}
+
+.kanban_card {
+    flex-shrink: 0;
+    width: 100%;
+    height: 21%;
+    border-radius: 8px;
+    box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
+    padding: 5px 10px 5px 10px;
+    color: #FFF;
+    cursor: pointer;
+    cursor: move;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kanban_card:active {
+    transform: scale(1.02);
+    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+}
+
+.kanban_card_container.drag-over {
+    background-color: #f0f6ff;
+    border: 2px dashed #1e557c;
+}
+
+.kanban_card.dragging {
+    opacity: 0.5;
+}
+
+.kanban_card_bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.kanban_edate {
+    margin-top: 15px;
+    margin-bottom: 0px;
+}
+
+.kanban_end_date_value p {
+    margin-bottom: 0px;
+}
+
+.kanban_end_date_value {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.kanban_card_title {
+    color: var(--Light-version-Type-dark, #223759);
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 25px; 
+}
+
+.kanban_right {
+    display: flex;
+    align-items: center;
+}
+
+.kanban_time-left {
+    width: 25px;
+    height: 25px;
+    margin-right: 9px;
+}
+
+.kanban_right span {
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    font-size: medium;
+    background-color: #7700ff1e;
+    color: #000;
+}
+
+.kanban_end_date p {
+    color: #555252;
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+}
+
+/* Add these status classes */
+.status-todo {
+    background-color: #FFE4BC !important;
+    color: #995C16 !important;
+}
+
+.status-doing {
+    background-color: #FFD7D4 !important;
+    color: #891C0E !important;
+}
+
+.status-done {
+    background-color: #DCFCE7 !important;
+    color: #166534 !important;
+}
+
+/* Style for the three dots button */
+.three-dots-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* Custom dropdown menu styling */
+.status-dropdown-menu {
+    min-width: 120px;
+    padding: 0.5rem 0;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.status-dropdown-item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-dropdown-item:hover {
+    background-color: #dedfe0;
+}
