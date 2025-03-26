@@ -14,9 +14,6 @@ const TASK_STATUS = {
     COMPLETED: 'Completed'
   };
   
-
-  // Fonction pour charger le contenu du projet
- 
   // State management
   const state = {
     draggedTask: null,
@@ -25,8 +22,6 @@ const TASK_STATUS = {
     temporaryComments: [],
     searchTimeout: null
   };
-
-  
   
   // Initialization
   function init() {

@@ -33,7 +33,7 @@
 </div>
 <div class="d-flex">
     <i class="fa-solid fa-folder"></i>
-    <a href="/Gestion_Projet/Projets/Projects/index.php" 
+    <a href="/Gestion_Projet/Group_Project/Projects/index.php" 
        class="Projects fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Projects
@@ -41,7 +41,7 @@
 </div>
 <div class="d-flex" id="tasksBtn">
     <i class="fa-solid fa-square-check"></i>
-    <a href="/Gestion_Projet/Tasks/index.php" 
+    <a href="/Gestion_Projet/Prj2/index.php" 
        class="Tasks fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Tasks
@@ -51,7 +51,7 @@
                 
 <div class="d-flex">
     <i class="fa-solid fa-gauge"></i>
-    <a href="/Gestion_Projet/Dashboard/profile.php" 
+    <a href="/Gestion_Projet/Dasboard/profile.php" 
        class="Settings fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Settings
