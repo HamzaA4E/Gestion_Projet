@@ -2,22 +2,51 @@
 session_start();
 require 'db.php';
 
+$error = '';
+$project = [];
+$users = [];
+$selected_members = [];
+
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /Gestion_Projet/Dashboard/login.php");
+    header("Location: login.php");
     exit();
 }
 
-$error = '';
-$project_id = $_GET['id'];
-$user_id = $_SESSION['user_id'];
+// Get project data
+try {
+    $project_id = $_GET['id'];
+    $user_id = $_SESSION['user_id'];
 
-// Verify project ownership
-$stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ? AND creator_id = ?");
-$stmt->execute([$project_id, $user_id]);
-$project = $stmt->fetch();
+    $stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ? AND creator_id = ?");
+    $stmt->execute([$project_id, $user_id]);
+    $project = $stmt->fetch();
 
-if (!$project) {
-    die("Access denied or project not found");
+    if (!$project) {
+        $_SESSION['error'] = "You don't have permission to edit this project";
+        header("Location: index.php");
+        exit();
+    }
+} catch (PDOException $e) {
+    $error = "Error: " . $e->getMessage();
+}
+
+try {
+    // Get creator info
+    $stmt = $pdo->prepare("SELECT u.* FROM users u WHERE u.id = ?");
+    $stmt->execute([$project['creator_id']]);
+    $creator = $stmt->fetch();
+
+    // Get other users (excluding creator)
+    $stmt = $pdo->prepare("SELECT id, username FROM users WHERE id != ?");
+    $stmt->execute([$project['creator_id']]);
+    $users = $stmt->fetchAll();
+
+    // Get existing members (excluding creator)
+    $stmt = $pdo->prepare("SELECT user_id FROM project_members WHERE project_id = ? AND user_id != ?");
+    $stmt->execute([$project_id, $project['creator_id']]);
+    $selected_members = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -26,14 +55,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = htmlspecialchars($_POST['description']);
         $deadline = $_POST['deadline'];
         $status = $_POST['status'];
+        $new_members = $_POST['members'] ?? [];
 
-        $stmt = $pdo->prepare("UPDATE projects SET title = ?, description = ?, deadline = ?, status = ? WHERE id = ?");
+        // Update project
+        $stmt = $pdo->prepare("UPDATE projects SET 
+            title = ?, 
+            description = ?, 
+            deadline = ?, 
+            status = ? 
+            WHERE id = ?");
         $stmt->execute([$title, $description, $deadline, $status, $project_id]);
+
+        // Delete non-admin members (preserves creator/admin)
+        $stmt = $pdo->prepare("DELETE FROM project_members 
+                             WHERE project_id = ? 
+                             AND user_id != ? 
+                             AND is_admin = 0");
+        $stmt->execute([$project_id, $project['creator_id']]);
+
+        // Insert new members (excluding creator)
+        if (!empty($_POST['members'])) {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO project_members 
+                                 (project_id, user_id, is_admin) 
+                                 VALUES (?, ?, 0)");
+            foreach ($_POST['members'] as $user_id) {
+                if ($user_id != $project['creator_id']) {
+                    $stmt->execute([$project_id, $user_id]);
+                }
+            }
+        }
+
+        $_SESSION['success'] = "Project updated successfully";
+        header("Location: index.php");
+        exit();
 
         header("Location: index.php");
         exit();
     } catch (PDOException $e) {
-        $error = "Error updating project: " . $e->getMessage();
+        $error = "Error: " . $e->getMessage();
     }
 }
 ?>
@@ -95,6 +154,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <option value="On Hold" <?= $project['status'] === 'On Hold' ? 'selected' : '' ?>>On Hold</option>
                                         <option value="Completed" <?= $project['status'] === 'Completed' ? 'selected' : '' ?>>Completed</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <!-- Team Members Section -->
+                            <div class="mb-4">
+                                <label class="form-label">Team Members</label>
+                                <div class="scrollable-checkbox-group border rounded p-3">
+                                    <!-- Admin section -->
+                                    <div class="mb-3 p-2 bg-light rounded">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" checked disabled>
+                                            <label class="form-check-label fw-bold text-primary">
+                                                <i class="fas fa-crown me-2"></i>
+                                                <?= htmlspecialchars($creator['username']) ?> (Admin)
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Other members -->
+                                    <?php foreach ($users as $user): ?>
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                type="checkbox"
+                                                name="members[]"
+                                                value="<?= $user['id'] ?>"
+                                                <?= in_array($user['id'], $selected_members) ? 'checked' : '' ?>>
+                                            <label class="form-check-label">
+                                                <?= htmlspecialchars($user['username']) ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
 

@@ -3,13 +3,21 @@ session_start();
 require 'db.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /Gestion_Projet/Dashboard/login.php");
+    header("Location: login.php");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT * FROM projects WHERE creator_id  = ?");
-$stmt->execute([$user_id]);
+
+// Fetch projects where user is either the creator or a member
+$stmt = $pdo->prepare("
+    SELECT DISTINCT p.* 
+    FROM projects p
+    LEFT JOIN project_members pm ON p.id = pm.project_id
+    WHERE p.creator_id = ? OR pm.user_id = ?
+    ORDER BY p.created_at DESC
+");
+$stmt->execute([$user_id, $user_id]);
 $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -22,95 +30,89 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>AProjectO</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="brand">
-            <div class="brand-icon"><img src="Logo.svg" alt="Logo"></div>
+            <div class="brand-icon"><img src="/Group_Project/Projects/Logo.svg" alt="Logo"></div>
             <div class="brand-text">AProjectO</div>
         </div>
         <div class="menu">
-        
-<div class="d-flex">
-    <i class="fa-solid fa-gauge"></i>
-    <a href="/Gestion_Projet/Dashboard/dashboard.php" 
-       class="Dashboard fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Dashboard
-    </a>
-</div>
-<div class="d-flex">
-    <i class="fa-solid fa-folder"></i>
-    <a href="/Gestion_Projet/Projets/Projects/index.php" 
-       class="Projects fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Projects
-    </a>
-</div>
-<div class="d-flex" id="tasksBtn">
-    <i class="fa-solid fa-square-check"></i>
-    <a href="/Gestion_Projet/Tasks/index.php" 
-       class="Tasks fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Tasks
-    </a>
-</div>
-<div class="d-flex">
-    <i class="fa-solid fa-comment"></i>
-    <a href="/Gestion_Projet/Dashboard/group_chat.php" 
-       class="Tasks fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Discussion
-    </a>
-</div>
-<div class="d-flex">
-    <i class="fa-solid fa-users-line"></i>
-    <a href="/Gestion_Projet/Dashboard/groups.php" 
-       class="Tasks fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Groupes
-    </a>
-</div>
-
-                
-<div class="d-flex">
-    <i class="fa-solid fa-gears"></i>
-    <a href="/Gestion_Projet/Dashboard/profile.php" 
-       class="Settings fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Settings
-    </a>
-</div>
-<div class="d-flex">
-<i class="fa-solid fa-right-from-bracket"></i>
-    <a href="/Gestion_Projet/Dashboard/php/logout.php" 
-       class="Settings fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Déconnexion
-    </a>
-</div>
+            <a href="#" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                Dashboard
+            </a>
+            <a href="#" class="menu-item active">
+                <i class="fas fa-th-large"></i>
+                Project
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-tasks"></i>
+                Tasks
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
         </div>
     </div>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light mb-4">
         <div class="container-fluid">
-            <div class="flex-grow-1"></div>
-            <div class="search-box navbar_search me-3">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="form-control" placeholder="Search for anything...">
+            <div class="brand d-lg-none">
+                <div class="brand-icon"><img src="/Group_Project/Projects/Logo.svg" alt="Logo"></div>
+                <div class="brand-text">AProjectO</div>
             </div>
-            <div class="notifications me-3">
-                <i class="far fa-bell"></i>
-            </div>
-            <div class="user-profile">
-                <img src="profile_photo.svg" alt="User" class="user-avatar">
-                <div class="user-info">
-                    <p class="user-name">Anima Agrawal</p>
-                    <p class="user-location">UP, India</p>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Mobile Menu Items (visible only on mobile) -->
+                <div class="d-lg-none mobile-menu mb-3">
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="menu-item active">
+                        <i class="fas fa-th-large"></i>
+                        Project
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-tasks"></i>
+                        Tasks
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                </div>
+
+                <!-- Regular Navbar Items -->
+                <div class="navbar-nav ms-auto d-flex align-items-center gap-3">
+                    <div class="search-box navbar_search">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="form-control" placeholder="Search for anything...">
+                    </div>
+                    <div class="notifications">
+                        <i class="far fa-bell"></i>
+                    </div>
+                    <div class="user-profile">
+                        <img src="/Group_Project/Projects/profile_photo.svg" alt="User" class="user-avatar">
+                        <div class="user-info">
+                            <p class="user-name mb-0">Anima Agrawal</p>
+                            <p class="user-location mb-0">UP, India</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,6 +134,27 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
+        <!-- DELETE MODAL -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <p>Are you sure you want to delete this project? This action cannot be undone.</p>
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">
+                                <i class="fas fa-trash-alt me-2"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Projects Grid -->
         <div class="row">
             <?php if (empty($projects)): ?>
@@ -144,9 +167,25 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="project-card position-relative">
                             <div class="project-card-header">
                                 <h3 class="project-title"><?= htmlspecialchars($project['title']) ?></h3>
-                                <a href="edit_project.php?id=<?= $project['id'] ?>" class="edit-button">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                <?php
+                                // Check if current user is the project creator
+                                $is_creator = ($project['creator_id'] == $_SESSION['user_id']);
+                                ?>
+                                <?php if ($is_creator): ?>
+                                    <div class="d-flex gap-2">
+                                        <a href="edit_project.php?id=<?= $project['id'] ?>" class="edit-button">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-link text-danger delete-project-btn"
+                                            data-project-id="<?= $project['id'] ?>">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                <?php else: ?>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-user-check me-2"></i>Member
+                                    </span>
+                                <?php endif; ?>
                             </div>
                             <div class="project-card-body">
                                 <p class="project-desc"><?= htmlspecialchars($project['description']) ?></p>
@@ -156,11 +195,8 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <i class="fas fa-users member-icon"></i>
                                         <?php
                                         $stmt = $pdo->prepare("SELECT COUNT(*) AS member_count 
-                                        FROM project_members 
-                                        WHERE project_id = ?");
-                                        $stmt->execute([$project['id']]);
-                                        $result = $stmt->fetch();
-                                        $member_count = $result['member_count'];
+                                    FROM project_members 
+                                    WHERE project_id = ?");
                                         $stmt->execute([$project['id']]);
                                         $member_count = $stmt->fetchColumn();
                                         echo $member_count . ' Members';
@@ -176,9 +212,6 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
-    </div>
-
-    <script src="script.js"></script>
 </body>
 
 </html>
