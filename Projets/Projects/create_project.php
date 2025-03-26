@@ -112,33 +112,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
 
-                            <!-- Team Members -->
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label class="form-label">Team Members</label>
-                                <div class="scrollable-checkbox-group border rounded p-3">
-                                    <!-- Creator (always checked and disabled) -->
-                                    <?php
-                                    $stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
-                                    $stmt->execute([$_SESSION['user_id']]);
-                                    $creator = $stmt->fetch();
-                                    ?>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
-                                            checked disabled>
-                                        <label class="form-check-label fw-bold text-primary">
-                                            <i class="fas fa-crown me-2"></i>
-                                            <?= htmlspecialchars($creator['username']) ?> (Admin)
-                                        </label>
-                                    </div>
-
-                                    <!-- Other users -->
+                                <div class="scrollable-checkbox-group">
                                     <?php foreach ($users as $user): ?>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                name="members[]"
-                                                value="<?= $user['id'] ?>"
-                                                id="user-<?= $user['id'] ?>">
-                                            <label class="form-check-label" for="user-<?= $user['id'] ?>">
+                                            <input class="form-check-input" type="checkbox" name="members[]"
+                                                value="<?= $user['id'] ?>" id="user<?= $user['id'] ?>">
+                                            <label class="form-check-label" for="user<?= $user['id'] ?>">
                                                 <?= htmlspecialchars($user['username']) ?>
                                             </label>
                                         </div>
@@ -146,10 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
 
-                            <!-- Buttons -->
-                            <div class="d-flex justify-content-end gap-2">
-                                <a href="index.php" class="btn btn-secondary">Cancel</a>
-                                <button type="submit" class="btn btn-primary">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="index.php" class="btn btn-secondary px-4">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4">
                                     <i class="fas fa-save me-2"></i>Create Project
                                 </button>
                             </div>
