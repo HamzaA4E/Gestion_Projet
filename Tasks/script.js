@@ -1,13 +1,6 @@
 // Constants
 
-document.getElementById('viewSelector').addEventListener('change', function() {
-    const selectedView = this.value;
 
-    if (selectedView === 'liste') {
-        // Redirection vers index.php
-        window.location.href = 'http://localhost/Prj2/liste.php';
-    }
-});
 const TASK_STATUS = {
     BACKLOG: 'Backlog',
     IN_PROGRESS: 'In Progress',
@@ -88,7 +81,7 @@ const TASK_STATUS = {
   });
 
   document.addEventListener('dragend', function() {
-    // Nettoyer les styles quand le drag se termine (même sans drop)
+   
     document.querySelectorAll('.task-container, .column-empty-area').forEach(el => {
         el.classList.remove('drag-over');
     });
@@ -133,7 +126,7 @@ const TASK_STATUS = {
   }
 
 
-  // Déplacez cette fonction au niveau racine (au même niveau que les autres fonctions)
+ 
 function closePopup() {
     const popupOverlay = document.getElementById('popupOverlay');
     if (popupOverlay) {
@@ -170,7 +163,7 @@ function closePopup() {
   function drop(e) {
     e.preventDefault();
     
-    // Retirer la classe drag-over de tous les conteneurs
+  
     document.querySelectorAll('.task-container, .column-empty-area').forEach(el => {
         el.classList.remove('drag-over');
     });
@@ -178,19 +171,19 @@ function closePopup() {
     const dropTarget = e.target.closest(".task-container") || e.target.closest('.column-empty-area');
     
     if (dropTarget && state.draggedTask) {
-        // Empêcher le drop sur le bouton "Ajouter une tâche"
+        
         if (e.target.closest('.add-task-btn')) return;
         
-        // Vérifier si la tâche est déplacée vers une nouvelle colonne
+        
         const newStatus = getColumnStatus(dropTarget);
         
-        // Mettre à jour le statut visuel
+        
         updateTaskStatus(state.draggedTask, newStatus);
         
-        // Déplacer la tâche dans le DOM
+       
         dropTarget.appendChild(state.draggedTask);
         
-        // Mettre à jour le statut en base de données
+       
         updateTaskStatusInDB(state.draggedTask.id.replace('task-', ''), newStatus);
         
         state.draggedTask.classList.remove("dragging");
@@ -198,12 +191,12 @@ function closePopup() {
     }
 }
 function updateTaskStatus(taskElement, newStatus) {
-  // Mettre à jour l'apparence selon le statut
+
   const statusElement = taskElement.querySelector('.task-status');
   if (statusElement) {
       statusElement.textContent = newStatus;
       
-      // Changer la couleur selon le statut
+      
       switch(newStatus) {
           case TASK_STATUS.BACKLOG:
               statusElement.style.backgroundColor = '#e3f2fd';
@@ -237,7 +230,7 @@ async function updateTaskStatusInDB(taskId, newStatus) {
       }
   } catch (error) {
       console.error("Erreur mise à jour statut:", error);
-      // Optionnel: annuler le changement visuel si l'API échoue
+    
   }
 }
   function drag(e) {
@@ -273,7 +266,7 @@ async function updateTaskStatusInDB(taskId, newStatus) {
     popupOverlay.classList.add('active');
     document.body.classList.add('popup-open');
     
-    // Focus sur le premier champ input quand le popup s'ouvre
+    
     setTimeout(() => {
         const firstInput = popupOverlay.querySelector('input');
         if (firstInput) firstInput.focus();
@@ -741,5 +734,7 @@ function getColumnStatus(columnElement) {
   
   return TASK_STATUS.BACKLOG;
 }
+
+
   // Initialize the application
   document.addEventListener('DOMContentLoaded', init);

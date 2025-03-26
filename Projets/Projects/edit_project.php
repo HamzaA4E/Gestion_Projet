@@ -3,7 +3,7 @@ session_start();
 require 'db.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: /Gestion_Projet/Dashboard/login.php");
     exit();
 }
 

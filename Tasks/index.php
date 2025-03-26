@@ -25,7 +25,7 @@
             <ul class="ulSidebar ">
             <div class="d-flex">
     <i class="fa-solid fa-gauge"></i>
-    <a href="/Gestion_Projet/Dasboard/dashboard.php" 
+    <a href="/Gestion_Projet/Dashboard/dashboard.php" 
        class="Dashboard fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Dashboard
@@ -33,7 +33,7 @@
 </div>
 <div class="d-flex">
     <i class="fa-solid fa-folder"></i>
-    <a href="/Gestion_Projet/Group_Project/Projects/index.php" 
+    <a href="/Gestion_Projet/Projets/Projects/index.php" 
        class="Projects fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Projects
@@ -41,20 +41,44 @@
 </div>
 <div class="d-flex" id="tasksBtn">
     <i class="fa-solid fa-square-check"></i>
-    <a href="/Gestion_Projet/Prj2/index.php" 
+    <a href="/Gestion_Projet/Tasks/index.php" 
        class="Tasks fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Tasks
     </a>
 </div>
+<div class="d-flex">
+    <i class="fa-solid fa-comment"></i>
+    <a href="/Gestion_Projet/Dashboard/group_chat.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Discussion
+    </a>
+</div>
+<div class="d-flex">
+    <i class="fa-solid fa-users-line"></i>
+    <a href="/Gestion_Projet/Dashboard/groups.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Groupes
+    </a>
+</div>
 
                 
 <div class="d-flex">
-    <i class="fa-solid fa-gauge"></i>
-    <a href="/Gestion_Projet/Dasboard/profile.php" 
+    <i class="fa-solid fa-gears"></i>
+    <a href="/Gestion_Projet/Dashboard/profile.php" 
        class="Settings fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Settings
+    </a>
+</div>
+<div class="d-flex">
+<i class="fa-solid fa-right-from-bracket"></i>
+    <a href="/Gestion_Projet/Dashboard/php/logout.php" 
+       class="Settings fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Déconnexion
     </a>
 </div>
             </ul>
@@ -134,135 +158,26 @@
         </div>
     </div>
     <div class="popup-overlay" id="popupOverlay">
-        <!-- Popup content will be loaded here dynamically -->
+       
     </div>
 
-
- 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM entièrement chargé"); // Debug 1
+        // Dans votre script.js
+document.getElementById('viewSelector')?.addEventListener('change', function() {
+    const selectedView = this.value;
     
-    const projectsBtn = document.getElementById('projectsBtn');
-    const tasksBtn = document.getElementById('tasksBtn');
-    const projectContent = document.getElementById('project-content');
-    const tasksContent = document.querySelector('.status');
-    const currentViewTitle = document.querySelector('.pt-3.ms-3.text-black-50');
-    const overviewTitle = document.querySelector('.Overview h4');
-
-    console.log("Éléments DOM sélectionnés:", { // Debug 2
-        projectsBtn,
-        tasksBtn,
-        projectContent,
-        tasksContent,
-        currentViewTitle,
-        overviewTitle
-    });
-
-    function loadProjectContent() {
-        console.log("Clic sur Projects détecté"); // Debug 3
+    if (selectedView === 'liste') {
+        // Utilisez soit un chemin absolu
+        window.location.href = '/Gestion_Projet/Tasks/liste.php';
         
-        const projectUrl = '/Gestion_Projet/Group_Project/Projects/index.php';
-        console.log("Tentative de chargement:", projectUrl); // Debug 4
-
-        fetch(projectUrl)
-            .then(response => {
-                console.log("Réponse reçue, status:", response.status); // Debug 5
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(html => {
-                console.log("Chargement réussi, injection du HTML"); // Debug 6
-                projectContent.innerHTML = html;
-                showProjectView();
-            })
-            .catch(error => {
-                console.error("Erreur lors du chargement:", error); // Debug 7
-                projectContent.innerHTML = `
-                    <div class="alert alert-danger">
-                        Error loading project: ${error.message}
-                    </div>
-                `;
-                showProjectView();
-            });
-    }
-
-    function showProjectView() {
-        console.log("Affichage de la vue Projet"); // Debug 8
-        projectContent.style.display = 'block';
-        tasksContent.style.display = 'none';
-        if (currentViewTitle) currentViewTitle.textContent = 'Projects';
-        if (overviewTitle) overviewTitle.textContent = 'Group Project';
-    }
-
-    function showTasksView() {
-        console.log("Affichage de la vue Tâches"); // Debug 9
-        tasksContent.style.display = 'flex';
-        projectContent.style.display = 'none';
-        if (currentViewTitle) currentViewTitle.textContent = 'Tasks';
-        if (overviewTitle) overviewTitle.textContent = 'Overview';
-    }
-
-    if (projectsBtn) {
-        projectsBtn.addEventListener('click', function(e) {
-            console.log("Event détaillé:", e); // Debug 10
-            loadProjectContent();
-        });
-    } else {
-        console.error("Bouton Projects non trouvé!"); // Debug 11
-    }
-
-    if (tasksBtn) {
-        tasksBtn.addEventListener('click', showTasksView);
+        // Ou un chemin relatif si vous préférez
+        // window.location.href = 'Tasks/liste.php';
     }
 });
-    </script>
-    <!-- <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('[INIT] Script dashboard chargé');
-    
-    const dashboardBtn = document.getElementById('dashboardBtn');
-    
-    if (!dashboardBtn) {
-        console.error('[ERREUR] Bouton Dashboard introuvable');
-        return;
-    }
-
-    dashboardBtn.addEventListener('click', function() {
-        console.log('[CLIC] Bouton Dashboard cliqué');
-        
-        // CHEMIN ABSOLU CORRIGÉ (notez le /Dashboard/ avec D majuscule)
-        const dashboardUrl = '/Gestion_Projet/Dasboard/dashboard.php'; 
-        
-        console.log('[CHARGEMENT] Tentative de chargement:', dashboardUrl);
-        
-        // Solution 1: Chargement AJAX (recommandé)
-        fetch(dashboardUrl)
-            .then(response => {
-                console.log('[REPONSE] Statut:', response.status);
-                if (!response.ok) throw new Error('Erreur '+response.status);
-                return response.text();
-            })
-            .then(html => {
-                console.log('[SUCCÈS] Contenu chargé - Remplacement du body');
-                document.body.innerHTML = html;
-            })
-            .catch(error => {
-                console.error('[ERREUR]', error);
-                // Solution de repli
-                window.location.href = dashboardUrl;
-            });
-
-        // Solution alternative 2: Redirection simple (décommentez si nécessaire)
-        // window.location.href = dashboardUrl;
-    });
-});
-</script> -->
-    <!-- Scripts -->
-    <script src="/Boostarp/js/bootstrap.bundle.min.js"></script>
+</script>
+    <script src="Boostarp/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    
 
 </body>
 </html>

@@ -3,12 +3,12 @@ session_start();
 require 'db.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: /Gestion_Projet/Dashboard/login.php");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT * FROM projects WHERE creator_id = ?");
+$stmt = $pdo->prepare("SELECT * FROM projects WHERE creator_id  = ?");
 $stmt->execute([$user_id]);
 $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -29,13 +29,14 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="brand">
-            <div class="brand-icon"><img src="/Group_Project/Projects/Logo.svg" alt="Logo"></div>
+            <div class="brand-icon"><img src="Logo.svg" alt="Logo"></div>
             <div class="brand-text">AProjectO</div>
         </div>
         <div class="menu">
-        <div class="d-flex">
+        
+<div class="d-flex">
     <i class="fa-solid fa-gauge"></i>
-    <a href="/Gestion_Projet/Dasboard/dashboard.php" 
+    <a href="/Gestion_Projet/Dashboard/dashboard.php" 
        class="Dashboard fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Dashboard
@@ -58,11 +59,37 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </a>
 </div>
 <div class="d-flex">
-    <i class="fa-solid fa-gauge"></i>
+    <i class="fa-solid fa-comment"></i>
+    <a href="/Gestion_Projet/Dashboard/group_chat.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Discussion
+    </a>
+</div>
+<div class="d-flex">
+    <i class="fa-solid fa-users-line"></i>
+    <a href="/Gestion_Projet/Dashboard/groups.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Groupes
+    </a>
+</div>
+
+                
+<div class="d-flex">
+    <i class="fa-solid fa-gears"></i>
     <a href="/Gestion_Projet/Dashboard/profile.php" 
        class="Settings fs-5 fw-bold"
        style="text-decoration: none; color: inherit;">
        Settings
+    </a>
+</div>
+<div class="d-flex">
+<i class="fa-solid fa-right-from-bracket"></i>
+    <a href="/Gestion_Projet/Dashboard/php/logout.php" 
+       class="Settings fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Déconnexion
     </a>
 </div>
         </div>
@@ -80,7 +107,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <i class="far fa-bell"></i>
             </div>
             <div class="user-profile">
-                <img src="/Group_Project/Projects/profile_photo.svg" alt="User" class="user-avatar">
+                <img src="profile_photo.svg" alt="User" class="user-avatar">
                 <div class="user-info">
                     <p class="user-name">Anima Agrawal</p>
                     <p class="user-location">UP, India</p>

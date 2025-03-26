@@ -1,7 +1,7 @@
 <?php
 // db.php
 $host = 'localhost'; // Ou l'adresse de votre serveur MySQL
-$dbname = 'task_manager';
+$dbname = 'gestion_projets';
 $username = 'root'; // Remplacez par votre nom d'utilisateur MySQL
 $password = ''; // Remplacez par votre mot de passe MySQL
 
