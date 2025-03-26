@@ -1,24 +1,29 @@
--- Création de la base de données
-CREATE DATABASE IF NOT EXISTS gestion_projets;
-USE gestion_projets;
+-- Users Table
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- Table des projets (version autonome sans référence à users)
+-- Projects Table
 CREATE TABLE projects (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     deadline DATE,
-    status VARCHAR(50) DEFAULT 'Active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status ENUM('Ongoing','On Hold','Completed') DEFAULT 'Ongoing',
+    creator_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (creator_id) REFERENCES users(id)
 );
 
--- Table des tâches
-
--- Table des membres de projet (version simplifiée sans users)
 CREATE TABLE project_members (
     project_id INT,
-    member_name VARCHAR(100),  -- Champ texte libre à la place de user_id
-    role VARCHAR(50),
-    PRIMARY KEY (project_id, member_name),
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    user_id INT,
+    PRIMARY KEY (project_id, user_id),
+    FOREIGN KEY (project_id) REFERENCES projects(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+ALTER TABLE project_members ADD COLUMN is_admin TINYINT(1) DEFAULT 0;

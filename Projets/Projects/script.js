@@ -13,35 +13,89 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInputs.forEach(input => {
         input.addEventListener('keyup', function(e) {
             if (e.key === 'Enter') {
-                // Implement search functionality here
                 console.log('Searching for:', this.value);
             }
         });
     });
 
-    // Pagination interaction
-    const pageLinks = document.querySelectorAll('.page-link');
-    pageLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (!this.parentElement.classList.contains('active') && 
-                !this.getAttribute('aria-label')) {
-                document.querySelectorAll('.page-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                this.parentElement.classList.add('active');
-                // Implement pagination functionality here
-                console.log('Page changed to:', this.textContent);
-            }
-        });
+    // Status badge colors
+    document.querySelectorAll('.status-badge').forEach(badge => {
+        const status = badge.textContent.trim().toLowerCase().replace(/\s+/g, '');
+        badge.classList.add(`status-${status}`);
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Update status badge colors dynamically
-        document.querySelectorAll('.status-badge').forEach(badge => {
-            const status = badge.textContent.toLowerCase().replace(' ', '');
-            badge.className = `status-badge status-${status}`;
+    // Delete project functionality
+    let currentProjectId = null;
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    
+    // Set up delete buttons
+    document.querySelectorAll('.delete-project-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentProjectId = this.getAttribute('data-project-id');
+            deleteModal.show();
         });
     });
+    
+    // Confirm delete action
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (currentProjectId) {
+            fetch(`delete_project.php?id=${currentProjectId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Delete failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting project: ' + error.message);
+            });
+            deleteModal.hide();
+        }
+    });
 
+    // Toggle navbar
+    const toggleButton = document.querySelector('.navbar-toggler');
+    const navbarCollapse = document.querySelector('.navbar-collapse');
+
+    toggleButton.addEventListener('click', function() {
+        navbarCollapse.classList.toggle('show');
+    });
+
+    // Close navbar when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.navbar') && 
+            navbarCollapse.classList.contains('show')) {
+            navbarCollapse.classList.remove('show');
+        }
+    });
+
+    // Mobile navigation toggle
+    const sidebar = document.querySelector('.sidebar');
+
+    toggleButton.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+    });
+
+    // Close mobile nav when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.sidebar') && 
+            !event.target.closest('.navbar-collapse') && 
+            !event.target.closest('.navbar-toggler')) {
+            sidebar.classList.remove('active');
+            navbarCollapse.classList.remove('show');
+        }
+    });
 });

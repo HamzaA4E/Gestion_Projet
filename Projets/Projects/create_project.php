@@ -1,27 +1,26 @@
 <?php
 session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 require 'db.php';
-$error = '';
 
-// Redirect if not logged in
+$error = '';
+$users = [];
+
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /Gestion_Projet/Dashboard/login.php");
+    header("Location: login.php");
     exit();
 }
 
-// Get all users
 try {
-    $users = $pdo->query("SELECT * FROM users")->fetchAll();
+    // Get all users except the current user
+    $stmt = $pdo->prepare("SELECT id, username FROM users WHERE id != ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $users = $stmt->fetchAll();
 } catch (PDOException $e) {
-    die("Error fetching users: " . $e->getMessage());
+    $error = "Error loading users: " . $e->getMessage();
 }
 
-// Form handling
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // Validate inputs
         $title = htmlspecialchars($_POST['title']);
         $description = htmlspecialchars($_POST['description']);
         $deadline = $_POST['deadline'];
@@ -35,21 +34,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$title, $description, $deadline, $status, $creator_id]);
         $project_id = $pdo->lastInsertId();
 
-        // Insert members if any
-        if (!empty($members)) {
-            $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id) VALUES (?, ?)");
-            foreach ($members as $user_id) {
-                if (is_numeric($user_id)) {
-                    $stmt->execute([$project_id, $user_id]);
+        try {
+            // Always add creator as admin
+            $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, is_admin) VALUES (?, ?, 1)");
+            $stmt->execute([$project_id, $creator_id]);
+
+            // Add other members (0 = regular member)
+            if (!empty($members)) {
+                $stmt = $pdo->prepare("INSERT IGNORE INTO project_members (project_id, user_id, is_admin) VALUES (?, ?, 0)");
+                foreach ($members as $user_id) {
+                    if ($user_id != $creator_id) {
+                        $stmt->execute([$project_id, $user_id]);
+                    }
                 }
             }
-        }
 
-        header("Location: index.php");
-        exit();
+            header("Location: index.php");
+            exit();
+        } catch (PDOException $e) {
+            $error = "Error adding team members: " . $e->getMessage();
+        }
     } catch (PDOException $e) {
-        $error = "Database Error: " . $e->getMessage();
-    } catch (Exception $e) {
         $error = "Error: " . $e->getMessage();
     }
 }
@@ -68,9 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card shadow-lg">
+                <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Project</h3>
+                        <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Project</h4>
                     </div>
                     <div class="card-body">
                         <?php if ($error): ?>
@@ -78,33 +83,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
 
                         <form method="POST">
+                            <!-- Title -->
                             <div class="mb-3">
                                 <label class="form-label">Project Title</label>
-                                <input type="text"
-                                    class="form-control form-control-lg"
-                                    name="title"
-                                    required
-                                    placeholder="Enter project name">
+                                <input type="text" class="form-control" name="title" required>
                             </div>
 
+                            <!-- Description -->
                             <div class="mb-3">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control"
-                                    name="description"
-                                    rows="4"
-                                    required
-                                    placeholder="Describe your project"></textarea>
+                                <textarea class="form-control" name="description" rows="4" required></textarea>
                             </div>
 
+                            <!-- Deadline -->
                             <div class="mb-3">
                                 <label class="form-label">Deadline</label>
-                                <input type="date"
-                                    class="form-control"
-                                    name="deadline"
-                                    required
+                                <input type="date" class="form-control" name="deadline" required
                                     min="<?= date('Y-m-d') ?>">
                             </div>
 
+                            <!-- Status -->
                             <div class="mb-3">
                                 <label class="form-label">Status</label>
                                 <select class="form-select" name="status" required>
@@ -114,20 +112,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
 
-                           <div class="mb-3">
-    <label class="form-label">Team Members</label>
-    <div class="scrollable-checkbox-group">
-        <?php foreach ($users as $user): ?>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="members[]"
-                    value="<?= $user['id'] ?>" id="user<?= $user['id'] ?>">
-                <label class="form-check-label" for="user<?= $user['id'] ?>">
-                    <?= htmlspecialchars($user['nom'] . ' ' . $user['prenom']) ?>
-                </label>
-            </div>
-        <?php endforeach; ?>
-    </div>
-</div>
+                            <div class="mb-3">
+                                <label class="form-label">Team Members</label>
+                                <div class="scrollable-checkbox-group">
+                                    <?php foreach ($users as $user): ?>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="members[]"
+                                                value="<?= $user['id'] ?>" id="user<?= $user['id'] ?>">
+                                            <label class="form-check-label" for="user<?= $user['id'] ?>">
+                                                <?= htmlspecialchars($user['username']) ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                                 <a href="index.php" class="btn btn-secondary px-4">Cancel</a>
                                 <button type="submit" class="btn btn-primary px-4">

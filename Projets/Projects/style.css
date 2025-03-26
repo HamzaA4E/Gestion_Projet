@@ -81,6 +81,11 @@ body {
     overflow: hidden;
 }
 
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
 .project-card-header {
     padding: 16px 20px;
     border-bottom: 1px solid #f0f2f5;
@@ -323,4 +328,140 @@ body {
     border: 1px solid #dee2e6;
     border-radius: 5px;
     padding: 10px;
+}
+
+
+/* Member Management */
+.member-badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+.scrollable-checkbox-group {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.form-check-label {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.form-check-label:hover {
+    background-color: #f8f9fa;
+}
+
+/* Mobile Navigation Styles */
+@media (max-width: 991.98px) {
+    .sidebar {
+        display: none; /* Hide sidebar on mobile */
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Hide search box in main content */
+    .main-content .search-box {
+        display: none;
+    }
+
+    /* Keep navbar search box visible */
+    .navbar .search-box {
+        display: block;
+        width: 100%;
+    }
+
+    .navbar .search-box input {
+        width: 100%;
+    }
+
+    .navbar {
+        width: 100%;
+        left: 0;
+        right: 0;
+    }
+
+    .navbar .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .navbar .brand-icon img {
+        height: 30px;
+    }
+
+    .navbar-collapse {
+        background: white;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        height: fit-content;
+        padding: 1rem;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .mobile-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .mobile-menu .menu-item {
+        padding: 12px;
+        border-radius: 8px;
+        color: #666;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mobile-menu .menu-item.active {
+        background-color: #1e557c;
+        color: white;
+    }
+
+    .mobile-menu .menu-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .navbar-nav {
+        margin-top: 1rem;
+    }
+
+    .search-box, .notifications, .user-profile {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .user-profile {
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+}
+
+/* Desktop Navigation */
+@media (min-width: 992px) {
+    .mobile-menu {
+        display: none;
+    }
+
+    .navbar .brand {
+        display: none;
+    }
 }
