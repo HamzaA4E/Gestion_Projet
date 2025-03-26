@@ -163,7 +163,7 @@ function sendGroupInvitation($group_id, $sender_id, $receiver_id) {
         // Vérifier si une invitation en attente existe déjà
         $stmt = $pdo->prepare("
             SELECT COUNT(*) FROM group_invitations 
-            WHERE group_id = ? AND receiver_id = ? AND statut = 'en_attente'
+            WHERE group_id = ? AND receiver_id = ? AND status = 'en_attente'
         ");
         $stmt->execute([$group_id, $receiver_id]);
         
@@ -173,7 +173,7 @@ function sendGroupInvitation($group_id, $sender_id, $receiver_id) {
         
         // Créer l'invitation
         $stmt = $pdo->prepare("
-            INSERT INTO group_invitations (group_id, sender_id, receiver_id, statut, date_invitation) 
+            INSERT INTO group_invitations (group_id, sender_id, receiver_id, status, date_invitation) 
             VALUES (?, ?, ?, 'en_attente', NOW())
         ");
         
@@ -198,7 +198,7 @@ function getPendingInvitations($user_id) {
         FROM group_invitations gi
         JOIN groups g ON gi.group_id = g.id
         JOIN users u ON gi.sender_id = u.id
-        WHERE gi.receiver_id = ? AND gi.statut = 'en_attente'
+        WHERE gi.receiver_id = ? AND gi.status = 'en_attente'
         ORDER BY gi.date_invitation DESC
     ");
     $stmt->execute([$user_id]);
@@ -227,7 +227,7 @@ function respondToInvitation($invitation_id, $user_id, $response) {
         // Récupérer l'invitation
         $stmt = $pdo->prepare("
             SELECT * FROM group_invitations 
-            WHERE id = ? AND receiver_id = ? AND statut = 'en_attente'
+            WHERE id = ? AND receiver_id = ? AND status = 'en_attente'
         ");
         $stmt->execute([$invitation_id, $user_id]);
         $invitation = $stmt->fetch();
@@ -237,10 +237,10 @@ function respondToInvitation($invitation_id, $user_id, $response) {
             return false;
         }
         
-        // Mettre à jour le statut de l'invitation
+        // Mettre à jour le statu de l'invitation
         $stmt = $pdo->prepare("
             UPDATE group_invitations 
-            SET statut = ?, date_reponse = NOW() 
+            SET status = ?, date_reponse = NOW() 
             WHERE id = ?
         ");
         $stmt->execute([$response, $invitation_id]);

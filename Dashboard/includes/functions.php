@@ -129,14 +129,14 @@ function getRecentProjects($user_id, $limit = 5) {
                (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'completed') as completed_tasks,
                (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as total_tasks
         FROM projects p
-        WHERE p.user_id = ? OR p.id IN (
-            SELECT project_id FROM project_members WHERE user_id = ?
+        WHERE p.creator_id = ? OR p.id IN (
+            SELECT project_id FROM project_members WHERE creator_id = ?
         )
-        ORDER BY p.date_modification DESC
-        LIMIT ?
+        
+        
     ");
     
-    $stmt->execute([$user_id, $user_id, $limit]);
+    $stmt->execute([$user_id, $user_id]);
     
     return $stmt->fetchAll();
 }
@@ -152,15 +152,14 @@ function getPendingTasks($user_id, $limit = 5) {
     global $pdo;
     
     $stmt = $pdo->prepare("
-        SELECT t.*, p.nom as project_name
+        SELECT t.*, p.creator_id as project_name
         FROM tasks t
         JOIN projects p ON t.project_id = p.id
-        WHERE (t.assigned_to = ? OR p.user_id = ?) AND t.status != 'completed'
-        ORDER BY t.date_echeance ASC
-        LIMIT ?
+        WHERE (t.assigned_to = ? OR p.creator_id = ?) AND t.status != 'completed'
+        
     ");
     
-    $stmt->execute([$user_id, $user_id, $limit]);
+    $stmt->execute([$user_id, $user_id]);
     
     return $stmt->fetchAll();
 }
@@ -182,7 +181,7 @@ function getTasksStats($user_id) {
             SUM(CASE WHEN t.status = 'pending' THEN 1 ELSE 0 END) as pending
         FROM tasks t
         JOIN projects p ON t.project_id = p.id
-        WHERE t.assigned_to = ? OR p.user_id = ?
+        WHERE t.assigned_to = ? OR p.creator_id = ?
     ");
     
     $stmt->execute([$user_id, $user_id]);
@@ -263,7 +262,7 @@ function hasAccess($resource_id, $resource_type, $user_id) {
         case 'project':
             $stmt = $pdo->prepare("
                 SELECT COUNT(*) FROM projects 
-                WHERE id = ? AND (user_id = ? OR id IN (
+                WHERE id = ? AND (creator_id = ? OR id IN (
                     SELECT project_id FROM project_members WHERE user_id = ?
                 ))
             ");
@@ -274,7 +273,7 @@ function hasAccess($resource_id, $resource_type, $user_id) {
             $stmt = $pdo->prepare("
                 SELECT COUNT(*) FROM tasks t
                 JOIN projects p ON t.project_id = p.id
-                WHERE t.id = ? AND (t.assigned_to = ? OR p.user_id = ? OR p.id IN (
+                WHERE t.id = ? AND (t.assigned_to = ? OR p.creator_id = ? OR p.id IN (
                     SELECT project_id FROM project_members WHERE user_id = ?
                 ))
             ");

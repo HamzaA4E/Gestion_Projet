@@ -29,13 +29,13 @@ CREATE TABLE IF NOT EXISTS group_invitations (
     group_id INT NOT NULL,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
-    statut ENUM('en_attente', 'acceptee', 'refusee') NOT NULL DEFAULT 'en_attente',
+    status ENUM('en_attente', 'acceptee', 'refusee') NOT NULL DEFAULT 'en_attente',
     date_invitation DATETIME NOT NULL,
     date_reponse DATETIME DEFAULT NULL,
     FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_invitation (group_id, receiver_id, statut)
+    UNIQUE KEY unique_invitation (group_id, receiver_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table des messages de groupe

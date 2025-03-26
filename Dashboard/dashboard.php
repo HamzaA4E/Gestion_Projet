@@ -95,29 +95,14 @@ $pending_invitations = getPendingInvitations($user_id);
             <div class="btn" style="display: grid;">
                 <ul class="nav flex-column">
                     <li class="nav-item" style="margin-left: -10px;"><a href="dashboard.php" id="link1" class="nav-link text-dark active">Home</a></li>
-                    <div class="d-flex">
-    <i class="fa-solid fa-folder"></i>
-    <a href="/Gestion_Projet/Group_Project/Projets/index.php" 
-       class="Projects fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Projects
-    </a>
-</div>
-<div class="d-flex" id="tasksBtn">
-    <i class="fa-solid fa-square-check"></i>
-    <a href="/Gestion_Projet/Tasks/index.php" 
-       class="Tasks fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Tasks
-    </a>
-</div>
-                    
+                    <li class="nav-item" style="margin-left: -10px;"><a href="/Gestion_Projet-main/Projets/Projects/index.php" class="nav-link text-dark" >Projects</a></li>
+                    <li class="nav-item" style="margin-left: -10px;"><a href="/Gestion_Projet-main/Tasks/index.php" class="nav-link text-dark">Tasks</a></i>  
                     <li class="nav-item" style="margin-left: -10px;"><a href="group_chat.php" id="link5" class="nav-link text-dark">Discussion</a></li>
                     <li class="nav-item" style="margin-left: -10px;"><a href="groups.php" id="link6" class="nav-link text-dark">Groupes</a></li>
                     <li class="nav-item" style="margin-left: -10px;"><a href="profile.php" id="link7" class="nav-link text-dark">Settings</a></li>
                 </ul>
                 <div class="logout-container">
-                    <a href="php/logout.php" class="nav-link text-dark logout-btn">Déconnexion</a>
+                    <a class="nav-link text-dark logout-btn" style="margin-left: -10px;" href="php/logout.php">Déconnexion</a>
                 </div>
             </div>
         </div>

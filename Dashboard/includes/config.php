@@ -31,7 +31,7 @@ try {
 
 // Paramètres de l'application
 define('APP_NAME', 'Gestion de Projets');
-define('APP_URL', 'http://localhost/projet_gestion');
+define('APP_URL', 'http://localhost/Gestion_Projet-main');
 define('UPLOAD_DIR', 'img/profiles/');
 
 // Fuseau horaire

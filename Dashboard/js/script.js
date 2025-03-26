@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 label.style.textDecoration = 'line-through';
                 label.style.color = '#6c757d';
                 
-                // Ici, on pourrait ajouter une requête AJAX pour mettre à jour le statut de la tâche
+                // Ici, on pourrait ajouter une requête AJAX pour mettre à jour le statu de la tâche
                 // dans la base de données
             } else {
                 label.style.textDecoration = 'none';
