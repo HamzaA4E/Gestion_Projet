@@ -1,4 +1,4 @@
-USE project_manager;
+USE gestion_projets;
 
 -- Users Table with auto-generated username
 CREATE TABLE IF NOT EXISTS users (
