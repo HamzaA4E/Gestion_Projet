@@ -100,7 +100,7 @@ body {
     background-color: var(--sidebar-bg);
     box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    width: 100%;
+
 }
 
 @media (min-width: 576px) {

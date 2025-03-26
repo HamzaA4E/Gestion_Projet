@@ -1,5 +1,26 @@
+:root {
+    --primary-bg: #f8f9fa;
+    --sidebar-bg: hsl(0, 15%, 91%);
+    --navbar-bg: hsl(0, 4%, 86%);
+    --text-dark: #0B3051;
+    --text-medium: #5D7285;
+    --text-light: #6c757d;
+    --border-color: #e0e0e0;
+    --blue-accent: #0085ad;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --transition-base: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
 body {
-    background-color: hsl(224, 23%, 84%);
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--primary-bg);
+    overflow-x: hidden;
+    line-height: 1.6;
+    color: var(--text-medium);
+    margin: 0;
+    padding: 0;
+    transition: all 0.3s ease;
 }
 #er{
     width: 100%;
@@ -72,11 +93,11 @@ body {
 }
 
 .sidebar {
-    width: 150px;
+    width: 200px;
     height: 100vh;
     margin-top: 60px;
     box-shadow: 1px 1px 1px 1px #184156;
-    background-color: #bcc2c5;
+    background-color: hsl(0, 15%, 91%);
     padding: 20px;
     position: fixed;
     z-index: 900;

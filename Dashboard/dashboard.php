@@ -70,9 +70,11 @@ $pending_invitations = getPendingInvitations($user_id);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Gestion de Projets</title>
-    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="Boostarp/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="Boostarp/css/all.min.css" />
+    <!-- <link rel="stylesheet" href="css/bootstrap.css"> -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/groups.css">
+    <!-- <link rel="stylesheet" href="css/groups.css"> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -90,23 +92,70 @@ $pending_invitations = getPendingInvitations($user_id);
             </div>
         </div>
     </div>
-    <div id="er01"> 
-        <div class="sidebar">
-            <div class="btn" style="display: grid;">
-                <ul class="nav flex-column">
-                    <li class="nav-item" style="margin-left: -10px;"><a href="dashboard.php" id="link1" class="nav-link text-dark active">Home</a></li>
-                    <li class="nav-item" style="margin-left: -10px;"><a href="/Gestion_Projet-main/Projets/Projects/index.php" class="nav-link text-dark" >Projects</a></li>
-                    <li class="nav-item" style="margin-left: -10px;"><a href="/Gestion_Projet-main/Tasks/index.php" class="nav-link text-dark">Tasks</a></i>  
-                    <li class="nav-item" style="margin-left: -10px;"><a href="group_chat.php" id="link5" class="nav-link text-dark">Discussion</a></li>
-                    <li class="nav-item" style="margin-left: -10px;"><a href="groups.php" id="link6" class="nav-link text-dark">Groupes</a></li>
-                    <li class="nav-item" style="margin-left: -10px;"><a href="profile.php" id="link7" class="nav-link text-dark">Settings</a></li>
-                </ul>
-                <div class="logout-container">
-                    <a class="nav-link text-dark logout-btn" style="margin-left: -10px;" href="php/logout.php">Déconnexion</a>
-                </div>
-            </div>
+    
+    <div class="sidebar px-3">
+            <ul class="ulSidebar ">
+            <div class="d-flex">
+    <i class="fa-solid fa-gauge"></i>
+    <a href="/Gestion_Projet/Dashboard/dashboard.php" 
+       class="Dashboard fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Dashboard
+    </a>
+</div>
+<div class="d-flex">
+    <i class="fa-solid fa-folder"></i>
+    <a href="/Gestion_Projet/Projets/Projects/index.php" 
+       class="Projects fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Projects
+    </a>
+</div>
+<div class="d-flex" id="tasksBtn">
+    <i class="fa-solid fa-square-check"></i>
+    <a href="/Gestion_Projet/Tasks/index.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Tasks
+    </a>
+</div>
+<div class="d-flex">
+    <i class="fa-solid fa-comment"></i>
+    <a href="/Gestion_Projet/Dashboard/group_chat.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Discussion
+    </a>
+</div>
+<div class="d-flex">
+    <i class="fa-solid fa-users-line"></i>
+    <a href="/Gestion_Projet/Dashboard/groups.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Groupes
+    </a>
+</div>
+
+                
+<div class="d-flex">
+    <i class="fa-solid fa-gears"></i>
+    <a href="/Gestion_Projet/Dashboard/profile.php" 
+       class="Settings fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Settings
+    </a>
+</div>
+<div class="d-flex">
+<i class="fa-solid fa-right-from-bracket"></i>
+    <a href="/Gestion_Projet/Dashboard/php/logout.php" 
+       class="Settings fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Déconnexion
+    </a>
+</div>
+            </ul>
         </div>
-    </div>
+    
     <div class="content">
         <div class="dashboard-header">
             <h3 class="text-dark dashboard-title">
