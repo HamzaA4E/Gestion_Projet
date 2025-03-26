@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$db   = 'project_manager';
+$db   = 'gestion_projets';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';

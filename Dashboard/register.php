@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Désactivation des avertissements pour une meilleure expérience utilisateur
 error_reporting(E_ERROR | E_PARSE);
 
@@ -39,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $poste = trim($_POST['poste']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
-    
+
     // Validation des données
     if (empty($nom) || empty($prenom) || empty($email) || empty($password) || empty($confirm_password)) {
         $error_message = "Les champs marqués d'un astérisque sont obligatoires.";
@@ -54,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Hashage du mot de passe
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        
+
         // Création du compte utilisateur
         if (createUser($nom, $prenom, $email, $telephone, $poste, $hashed_password)) {
             $success_message = "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.";
@@ -69,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/auth.css">
 </head>
+
 <body class="auth-body">
     <div class="auth-container">
         <div class="auth-card register-card">
@@ -84,13 +90,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2>Inscription</h2>
                 <p>Créez votre compte pour accéder à la plateforme</p>
             </div>
-            
+
             <?php if (!empty($error_message)): ?>
                 <div class="alert alert-danger" role="alert">
                     <?php echo $error_message; ?>
                 </div>
             <?php endif; ?>
-            
+
             <?php if (!empty($success_message)): ?>
                 <div class="alert alert-success" role="alert">
                     <?php echo $success_message; ?>
@@ -142,11 +148,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </form>
             <?php endif; ?>
-            
+
             <div class="auth-footer">
                 <p>Vous avez déjà un compte ? <a href="login.php">Connectez-vous</a></p>
             </div>
         </div>
     </div>
 </body>
+
 </html>
