@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
             SUBSTRING(REPLACE(prenom, ' ', ''),  -- First name (no spaces)
             '.',                                  -- Dot separator
             REPLACE(nom, ' ', '')                 -- Last name (no spaces)
-        ))
-    )) STORED UNIQUE,
+        )
+    ))) STORED UNIQUE,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE DEFAULT NULL,
     telephone VARCHAR(20) DEFAULT NULL,
