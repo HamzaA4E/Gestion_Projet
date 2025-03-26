@@ -114,21 +114,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Team Members</label>
-                                <div class="scrollable-checkbox-group">
-                                    <?php foreach ($users as $user): ?>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="members[]"
-                                                value="<?= $user['id'] ?>" id="user<?= $user['id'] ?>">
-                                            <label class="form-check-label" for="user<?= $user['id'] ?>">
-                                                <?= htmlspecialchars($user['username']) ?>
-                                            </label>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-
+                           <div class="mb-3">
+    <label class="form-label">Team Members</label>
+    <div class="scrollable-checkbox-group">
+        <?php foreach ($users as $user): ?>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="members[]"
+                    value="<?= $user['id'] ?>" id="user<?= $user['id'] ?>">
+                <label class="form-check-label" for="user<?= $user['id'] ?>">
+                    <?= htmlspecialchars($user['nom'] . ' ' . $user['prenom']) ?>
+                </label>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                                 <a href="index.php" class="btn btn-secondary px-4">Cancel</a>
                                 <button type="submit" class="btn btn-primary px-4">
