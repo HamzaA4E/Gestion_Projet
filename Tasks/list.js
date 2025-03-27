@@ -55,23 +55,23 @@ async function loadTasks() {
 
 async function loadTasksFromDB() {
     try {
-        const response = await fetch('api/tasks.php?table=test');
+        const response = await fetch('api/tasks.php?table=tasks'); // Changé de 'test' à 'tasks'
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
         
         const data = await response.json();
-        console.log('Données brutes reçues:', data); // Debug
         
-        // Vérifiez le format des dates
-        data.forEach(task => {
-            console.log(`Tâche ${task.id}:`, {
-                title: task.title,
-                deadline_date: task.deadline_date,
-                deadline_time: task.deadline_time,
-                raw_date: `${task.deadline_date}T${task.deadline_time || '00:00'}`
-            });
-        });
-        
-        return data;
+        return data.map(task => ({
+            id: task.id,
+            title: task.titre,
+            description: task.description,
+            due_date: task.date_echeance,
+            priority: task.priorite,
+            status: task.status,
+            assigned_to: task.assigned_to,
+            project_id: task.project_id,
+            date_creation: task.date_creation,
+            date_modification: task.date_modification
+        }));
     } catch (error) {
         console.error('Erreur lors du chargement:', error);
         return [];
@@ -83,23 +83,27 @@ function createTaskElement(task) {
     taskElement.className = 'task-item';
     taskElement.id = 'task-' + task.id;
     
-    // Stockage des données
-    taskElement.dataset.deadlineDate = task.deadline_date || '';
-    taskElement.dataset.deadlineTime = task.deadline_time || '';
-    taskElement.dataset.comments = JSON.stringify(task.comments || []);
+    // Stockage des données - adapter aux champs de votre table
+    taskElement.dataset.dueDate = task.due_date || '';
+    taskElement.dataset.priority = task.priority || 'moyenne';
+    taskElement.dataset.status = task.status || 'pending';
+    taskElement.dataset.projectId = task.project_id || '';
+    taskElement.dataset.assignedTo = task.assigned_to || '';
 
     // Construction du HTML
     taskElement.innerHTML = `
         <div class="task-header">
             <h5>${task.title || 'Nouvelle tâche'}</h5>
-            <span class="task-status">${task.status || 'backlog'}</span>
+            <span class="task-status">${task.status || 'pending'}</span>
         </div>
         <div class="task-description">
             <p>${task.description || ''}</p>
         </div>
         <div class="task-footer">
-            <span class="deadline">${formatDeadline(task.deadline_date, task.deadline_time)}</span>
-            <span class="comments-count">${task.comments ? task.comments.length : 0} commentaires</span>
+            <span class="deadline">${formatDeadline(task.due_date)}</span>
+            <span class="priority-badge priority-${task.priority || 'moyenne'}">
+                ${task.priority || 'moyenne'}
+            </span>
         </div>
     `;
     
@@ -107,29 +111,22 @@ function createTaskElement(task) {
 }
 
 // Fonction helper pour formater la date
-function formatDeadline(date, time) {
-    // Vérifier si la date est valide et non vide
-    if (!date || date === '0000-00-00' || date === '1970-01-01') {
+function formatDeadline(due_date) {
+    if (!due_date || due_date === '0000-00-00' || due_date === '1970-01-01') {
         return 'Pas de date limite';
     }
 
     try {
-        // Convertir la date au format ISO (ajout du time si nécessaire)
-        const dateStr = time ? `${date}T${time}` : `${date}T00:00:00`;
-        const formattedDate = new Date(dateStr);
+        const formattedDate = new Date(due_date);
         
-        // Vérifier que la date est valide
         if (isNaN(formattedDate.getTime())) {
-            console.warn('Date invalide:', date, time);
             return 'Date invalide';
         }
 
-        return formattedDate.toLocaleString('fr-FR', {
+        return formattedDate.toLocaleDateString('fr-FR', {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+            year: 'numeric'
         });
     } catch (e) {
         console.error('Erreur de formatage de date:', e);
@@ -263,17 +260,20 @@ function setupTaskEditing() {
 }
 
 function loadTaskDataForPopup(taskElement) {
-    // Vérification complète de l'existence des éléments
-    const getSafeText = (selector) => 
-        taskElement.querySelector(selector)?.textContent?.trim() || '';
+    // Vérifier que taskElement est bien un élément DOM
+    if (!(taskElement instanceof Element)) {
+        console.error('taskElement doit être un élément DOM', taskElement);
+        return;
+    }
 
+    // Extraire les données de l'élément DOM
     const taskData = {
-        title: getSafeText('.task-header h5'),
-        description: getSafeText('.task-description p'),
-        status: getSafeText('.task-status'),
-        deadlineDate: taskElement.dataset.deadlineDate || '',
-        deadlineTime: taskElement.dataset.deadlineTime || '23:59',
-        comments: JSON.parse(taskElement.dataset.comments || '[]')
+        id: taskElement.id.replace('task-', ''),
+        title: taskElement.querySelector('.task-header h5')?.textContent || '',
+        description: taskElement.querySelector('.task-description p')?.textContent || '',
+        due_date: taskElement.dataset.dueDate || '',
+        priority: taskElement.dataset.priority || 'medium',
+        status: taskElement.querySelector('.task-status')?.textContent || 'backlog'
     };
 
     showTaskPopup('Modifier la tâche', taskData);
@@ -287,60 +287,36 @@ function createNewTask(title, description, commentText, deadlineDate, deadlineTi
 
     taskCounter++;
 
-    // Créer une nouvelle tâche
     const newTask = document.createElement('div');
-    newTask.className = 'task mt-4 p-3 rounded-4';
-    newTask.draggable = true;
-    newTask.id = 'task' + taskCounter;
-    newTask.setAttribute('ondragstart', 'drag(event)');
-
-    // Calculer le temps restant en minutes
-    const timeLeftText = calculateTimeLeft(deadlineDate, deadlineTime);
-
-    // Déterminer le nombre de commentaires
-    const commentCount = temporaryComments.length + (commentText && commentText.trim() !== '' ? 1 : 0);
-
+    newTask.className = 'task-item';
+    newTask.id = 'task-' + taskCounter;
+    
+    // Stocker les données
+    newTask.dataset.dueDate = deadlineDate || '';
+    newTask.dataset.priority = 'moyenne';
+    newTask.dataset.status = 'pending';
+    
+    // Construction du HTML
     newTask.innerHTML = `
-        <div class="TaskHead d-flex justify-content-between">
-            <h5 class="mb-0">${title}</h5>
-            <p class="mb-0"><i class="fa-regular fa-clock me-1"></i>${timeLeftText}</p>
+        <div class="task-header">
+            <h5>${title || 'Nouvelle tâche'}</h5>
+            <span class="task-status">pending</span>
         </div>
-        <div class="my-2">
-            <p class="mb-1">${description}</p>
+        <div class="task-description">
+            <p>${description || ''}</p>
         </div>
-        <div class="d-flex gap-4 align-items-center">
-            <p class="mb-0"><i class="fa-solid fa-paperclip me-1"></i> 0</p>
-            <p class="mb-0"><i class="fa-regular fa-comment-dots me-1"></i> ${commentCount}</p>
-            <i class="fa-solid fa-user-plus ms-auto"></i>
-            <div class="d-flex flex-column gap-1">
-                <i class="fa-solid fa-arrow-up move-up" onclick="moveTaskUp(this)"></i>
-                <i class="fa-solid fa-arrow-down move-down" onclick="moveTaskDown(this)"></i>
-            </div>
-            <i class="fa-solid fa-trash delete-task" onclick="deleteTask('${newTask.id}', event)"></i>
+        <div class="task-footer">
+            <span class="deadline">${formatDeadline(deadlineDate)}</span>
+            <span class="priority-badge priority-moyenne">
+                moyenne
+            </span>
         </div>
     `;
 
-    // Stocker les informations de date limite dans les attributs data
-    if (deadlineDate) {
-        newTask.dataset.deadlineDate = deadlineDate;
-        newTask.dataset.deadlineTime = deadlineTime || '23:59';
-    }
-
-    // Ajouter la nouvelle tâche au conteneur cible
     currentTaskColumn.appendChild(newTask);
-
-    // Ajouter les commentaires temporaires à la tâche sans incrémenter le compteur
-    temporaryComments.forEach(comment => {
-        addCommentToTask(newTask, comment, false);
-    });
-
-    // Ajouter le commentaire passé directement lors de la création
-    if (commentText && commentText.trim() !== '') {
-        addCommentToTask(newTask, commentText, true);
-    }
-
-    // Réinitialiser les commentaires temporaires
-    temporaryComments = [];
+    
+    // Ici, vous devriez aussi envoyer les données au serveur
+    // via une requête AJAX pour créer la tâche dans la base de données
 }
 
 function addCommentToTask(taskElement, commentText, shouldIncrementCount = true) {
@@ -452,48 +428,41 @@ function ensurePopupOverlayExists() {
 }
 
 function showTaskPopup(title, taskData) {
-    // Fermer tout popup existant
     closePopup();
     
-    const popupOverlay = document.getElementById('popupOverlay');
+    const popupOverlay = ensurePopupOverlayExists();
     popupOverlay.innerHTML = createPopupHTML(title, taskData);
     popupOverlay.classList.add('active');
     
-    // Stocker les données plutôt que l'élément DOM
+    // Stocker les données pour la sauvegarde
     window.currentTaskData = taskData;
+    
+    // Configurer les écouteurs d'événements immédiatement après la création du popup
+    setupPopupEventListeners(taskData.id ? 'edit' : 'add');
 }
-
-function createPopupHTML(title, taskElement = null) {
-    const taskData = taskElement ? {
-        title: taskElement.querySelector('.task-header h5')?.textContent || '',
-        description: taskElement.querySelector('.task-description p')?.textContent || '',
-        deadlineDate: taskElement.dataset.deadlineDate === '0000-00-00' ? '' : taskElement.dataset.deadlineDate || '',
-        deadlineTime: taskElement.dataset.deadlineTime || '23:59',
-        status: taskElement.querySelector('.task-status')?.textContent || '',
-        comments: JSON.parse(taskElement.dataset.comments || '[]')
-    } : {
+function createPopupHTML(title, taskData = {}) {
+    // Valeurs par défaut
+    const defaults = {
         title: '',
         description: '',
-        deadlineDate: '',
-        deadlineTime: '23:59',
-        status: 'Backlog',
-        comments: []
+        due_date: '',
+        priority: 'moyenne',
+        status: 'pending',
+        project_id: ''
     };
+    
+    // Fusionner avec les données fournies
+    taskData = {...defaults, ...taskData};
 
-    const formattedDeadline = taskData.deadlineDate 
-        ? new Date(`${taskData.deadlineDate}T${taskData.deadlineTime}`).toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
+    // Formater la date
+    const formattedDeadline = taskData.due_date 
+        ? new Date(taskData.due_date).toLocaleDateString('fr-FR')
         : 'Non définie';
 
     return `
         <div class="task-form-container">
             <div class="form-header">
-                <div class="project-info">Projet: AProjectO</div>
+                <div class="project-info">Projet: ${taskData.project_id || 'Non assigné'}</div>
                 <div class="close-button">&times;</div>
             </div>
             
@@ -506,20 +475,28 @@ function createPopupHTML(title, taskElement = null) {
                 <div class="task-meta">
                     <div class="status-display">
                         <span class="meta-label">Statut:</span>
-                        <span class="status-value">${taskData.status}</span>
+                        <select class="status-select">
+                            <option value="pending" ${taskData.status === 'pending' ? 'selected' : ''}>En attente</option>
+                            <option value="in_progress" ${taskData.status === 'in_progress' ? 'selected' : ''}>En cours</option>
+                            <option value="on_hold" ${taskData.status === 'on_hold' ? 'selected' : ''}>En pause</option>
+                            <option value="completed" ${taskData.status === 'completed' ? 'selected' : ''}>Terminé</option>
+                        </select>
                     </div>
-                    <div class="deadline-display">
-                        <span class="meta-label">Date limite actuelle:</span>
-                        <span class="deadline-value">${formattedDeadline}</span>
+                    <div class="priority-display">
+                        <span class="meta-label">Priorité:</span>
+                        <select class="priority-select">
+                            <option value="basse" ${taskData.priority === 'basse' ? 'selected' : ''}>Basse</option>
+                            <option value="moyenne" ${taskData.priority === 'moyenne' ? 'selected' : ''}>Moyenne</option>
+                            <option value="haute" ${taskData.priority === 'haute' ? 'selected' : ''}>Haute</option>
+                            <option value="urgente" ${taskData.priority === 'urgente' ? 'selected' : ''}>Urgente</option>
+                        </select>
                     </div>
                 </div>
                 
                 <div class="deadline-container">
-                    <span class="deadline-label">Nouvelle date limite:</span>
-                    <input type="date" id="task-deadline" class="deadline-date" 
-                           value="${taskData.deadlineDate}">
-                    <input type="time" id="task-deadline-time" class="deadline-time" 
-                           value="${taskData.deadlineTime}">
+                    <span class="deadline-label">Date limite:</span>
+                    <input type="date" class="deadline-date" 
+                           value="${taskData.due_date.split(' ')[0] || ''}">
                 </div>
                 
                 <div class="form-fields">
@@ -528,33 +505,7 @@ function createPopupHTML(title, taskElement = null) {
                             <span class="field-icon">📝</span>
                             <span class="field-label">Description:</span>
                         </div>
-                        <textarea id="description" class="task-description-input">${escapeHtml(taskData.description)}</textarea>
-                    </div>
-                </div>
-                
-                <div class="comment-section">
-                    <div class="section-title">Commentaires (${taskData.comments.length})</div>
-                    <div id="commentDisplay" class="comments-list">
-                        ${taskData.comments.map(comment => `
-                            <div class="comment-item">
-                                <div class="comment-content">${escapeHtml(comment)}</div>
-                                <div class="comment-date">${new Date().toLocaleString()}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="comment-box">
-                        <div class="comment-input-container">
-                            <div class="comment-toolbar">
-                                <button type="button" class="toolbar-button" title="Gras"><strong>B</strong></button>
-                                <button type="button" class="toolbar-button" title="Italique"><em>I</em></button>
-                                <button type="button" class="toolbar-button" title="Liste">📋</button>
-                                <button type="button" class="toolbar-button" title="Hashtag">#</button>
-                            </div>
-                            <div id="comment" class="comment-input" contenteditable="true" 
-                                 placeholder="Ajouter un commentaire..."></div>
-                            <button type="button" class="btn btn-send-comment">Envoyer</button>
-                        </div>
+                        <textarea class="task-description-input">${escapeHtml(taskData.description)}</textarea>
                     </div>
                 </div>
             </div>
@@ -572,43 +523,79 @@ function setupPopupEventListeners(mode) {
     if (!popupOverlay) return;
 
     // Bouton de fermeture
-    const closeButton = popupOverlay.querySelector('.close-button');
-    if (closeButton) {
-        closeButton.addEventListener('click', closePopup);
-    }
-
+    popupOverlay.querySelector('.close-button')?.addEventListener('click', closePopup);
+    
     // Bouton Annuler
-    const cancelButton = popupOverlay.querySelector('.btn-cancel');
-    if (cancelButton) {
-        cancelButton.addEventListener('click', closePopup);
-    }
-
+    popupOverlay.querySelector('.btn-cancel')?.addEventListener('click', closePopup);
+    
     // Bouton Enregistrer
-    const saveButton = popupOverlay.querySelector('.btn-save');
-    if (saveButton) {
-        saveButton.addEventListener('click', () => {
-            if (mode === 'add') {
-                saveTask();
-            } else {
-                updateTask();
-            }
-        });
-    }
-
-    // Bouton Envoyer commentaire
-    const sendCommentBtn = popupOverlay.querySelector('.btn-send-comment');
-    if (sendCommentBtn) {
-        sendCommentBtn.addEventListener('click', sendComment);
-    }
-
-    // Fermeture en cliquant à l'extérieur
-    popupOverlay.addEventListener('click', (e) => {
-        if (e.target === popupOverlay) {
-            closePopup();
+    popupOverlay.querySelector('.btn-save')?.addEventListener('click', () => {
+        const formData = getTaskFormData();
+        
+        if (!formData.title.trim()) {
+            alert('Veuillez entrer un titre pour la tâche.');
+            return;
         }
+        
+        if (mode === 'add') {
+            createNewTask(
+                formData.title,
+                formData.description,
+                formData.comment,
+                formData.deadlineDate,
+                formData.deadlineTime
+            );
+        } else {
+            updateExistingTask(formData);
+        }
+        
+        closePopup();
+    });
+    
+    // Empêcher la propagation des clics dans le popup
+    popupOverlay.querySelector('.task-form-container')?.addEventListener('click', (e) => {
+        e.stopPropagation();
     });
 }
 
+function updateExistingTask(formData) {
+    if (!window.currentTaskData?.id) return;
+    
+    const taskElement = document.getElementById(`task-${window.currentTaskData.id}`);
+    if (!taskElement) return;
+    
+    // Mettre à jour le titre
+    const titleElement = taskElement.querySelector('.task-header h5');
+    if (titleElement) titleElement.textContent = formData.title;
+    
+    // Mettre à jour la description
+    const descElement = taskElement.querySelector('.task-description p');
+    if (descElement) descElement.textContent = formData.description;
+    
+    // Mettre à jour la date limite
+    if (formData.due_date) {
+        taskElement.dataset.dueDate = formData.due_date;
+        const deadlineElement = taskElement.querySelector('.deadline');
+        if (deadlineElement) {
+            deadlineElement.textContent = formatDeadline(formData.due_date);
+        }
+    }
+    
+    // Mettre à jour le statut
+    const statusElement = taskElement.querySelector('.task-status');
+    if (statusElement) {
+        statusElement.textContent = formData.status;
+        taskElement.dataset.status = formData.status;
+    }
+    
+    // Mettre à jour la priorité
+    const priorityElement = taskElement.querySelector('.priority-badge');
+    if (priorityElement) {
+        priorityElement.textContent = formData.priority;
+        priorityElement.className = `priority-badge priority-${formData.priority}`;
+        taskElement.dataset.priority = formData.priority;
+    }
+}
 function loadPopup(url, title, initialData, setupFunction) {
     fetch(url)
         .then(response => response.text())
@@ -707,13 +694,15 @@ function updateTask() {
 
 function getTaskFormData() {
     const popupOverlay = document.getElementById('popupOverlay');
+    if (!popupOverlay) return {};
     
     return {
-        title: popupOverlay.querySelector('.task-header input')?.value || '',
-        description: popupOverlay.querySelector('#description')?.value || '',
-        comment: popupOverlay.querySelector('#comment')?.value || '',
-        deadlineDate: popupOverlay.querySelector('#task-deadline')?.value || '',
-        deadlineTime: popupOverlay.querySelector('#task-deadline-time')?.value || ''
+        title: popupOverlay.querySelector('.task-title-input')?.value || '',
+        description: popupOverlay.querySelector('.task-description-input')?.value || '',
+        status: popupOverlay.querySelector('.status-select')?.value || 'pending',
+        priority: popupOverlay.querySelector('.priority-select')?.value || 'moyenne',
+        due_date: popupOverlay.querySelector('.deadline-date')?.value || '',
+        project_id: window.currentTaskData?.project_id || ''
     };
 }
 

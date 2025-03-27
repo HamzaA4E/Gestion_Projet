@@ -1028,3 +1028,69 @@ body {
         margin-top: 10px;
     }
 }
+/* Styles pour les badges de statut */
+.task-status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* À faire */
+.task-status[data-status="a_faire"],
+.task-status:contains("À faire") {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+/* En cours */
+.task-status[data-status="en_cours"],
+.task-status:contains("En cours") {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* Terminé */
+.task-status[data-status="termine"],
+.task-status:contains("Terminé") {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+
+/* Modifiez la classe .sidebar */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    min-height: 100vh; /* Prend toute la hauteur de l'écran */
+    height: 100%; /* S'assure que la hauteur est de 100% */
+    position: sticky; /* Permet de garder la sidebar fixe lors du scroll */
+    top: 0; /* Alignement en haut */
+    overflow-y: auto; /* Ajoute un scroll si le contenu dépasse */
+}
+
+/* Pour le conteneur principal */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Prend toute la hauteur de l'écran */
+}
+
+@media (min-width: 992px) {
+    .main-container {
+        flex-direction: row;
+    }
+    
+    .sidebar {
+        width: 250px; /* Largeur fixe pour les grands écrans */
+        position: sticky; /* Maintenir la sidebar fixe */
+        top: 0;
+        align-self: flex-start; /* Alignement en haut */
+    }
+    
+    .Content {
+        flex: 1; /* Prend le reste de l'espace */
+    }
+}
