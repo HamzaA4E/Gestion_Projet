@@ -171,7 +171,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     $is_creator = ($project['creator_id'] == $_SESSION['user_id']);
                     $is_member = !$is_creator;
                     ?>
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-4 mb-4" onclick="window.location='./Tasks/index.php?project_id=<?= $project['id'] ?>'">
                         <div class="project-card position-relative">
                             <div class="project-card-header">
                                 <h3 class="project-title"><?= htmlspecialchars($project['title']) ?></h3>
