@@ -1,3 +1,37 @@
+.sidebar {
+    width: 150px;
+    height: 100vh;
+    margin-top: 60px;
+    background-color: hsl(0, 15%, 91%);
+    padding: 20px;
+    position: fixed;
+    z-index: 900;
+}
+@media (min-width: 576px) {
+    .sidebar {
+        width: 180px;
+    }
+}
+
+@media (min-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+}
+
+@media (min-width: 992px) {
+    .sidebar {
+        width: 220px;
+        min-height: 100%;
+    }
+}
+.navbar-brand{
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 1.5rem;
+    text-decoration: none;
+}
+
 .chat-container {
     display: flex;
     flex-direction: column;

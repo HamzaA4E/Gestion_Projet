@@ -72,8 +72,8 @@ $pending_invitations = getPendingInvitations($user_id);
     <title>Dashboard - Gestion de Projets</title>
     <link rel="stylesheet" href="Boostarp/css/bootstrap.min.css" />
     <link rel="stylesheet" href="Boostarp/css/all.min.css" />
-    <!-- <link rel="stylesheet" href="css/bootstrap.css"> -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/styles.css">
     <!-- <link rel="stylesheet" href="css/groups.css"> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -81,12 +81,9 @@ $pending_invitations = getPendingInvitations($user_id);
 <div id="er">
     <div id="er00">
         <div id="er1">
-            <button id="div_nav">
-                <h2 id="h2_nav">Project</h2>
-            </button>
+        <a class="navbar-brand fs-3" href="#">AProjectO</a>
             <div id="em2">
-                <label id="lab_ser" for="chrch">Search</label>
-                <input id="chrch" type="search" placeholder="Projet/Tache">
+                
                 <h6 id="iduser_name"><?php echo htmlspecialchars($user['prenom'] . ' ' . $user['nom']); ?></h6>
                 <a href="profile.php" id="profile-link"><img src="<?php echo !empty($user['profile_image']) ? htmlspecialchars($user['profile_image']) : 'img/default-avatar.jpg'; ?>" alt="image de profil" class="img_prof"></a>
             </div>
