@@ -28,9 +28,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentProjectId = null;
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
     
-    // Set up delete buttons
+    // Set up delete buttons with proper event handling
     document.querySelectorAll('.delete-project-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent event from bubbling to card
             currentProjectId = this.getAttribute('data-project-id');
             deleteModal.show();
         });
@@ -64,6 +65,23 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             deleteModal.hide();
         }
+    });
+
+    // Make project cards clickable (NEW CODE)
+    document.querySelectorAll('.project-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Only proceed if not clicking on delete/edit buttons or their children
+            if (!e.target.closest('.delete-project-btn') && !e.target.closest('.edit-button')) {
+                const projectId = this.closest('.col-md-4').querySelector('.delete-project-btn').getAttribute('data-project-id');
+                window.location.href = `Gestion_Projet/Tasks/index.php?project_id=${projectId}`;
+            }
+        });
+        
+        // Add hover effect
+        card.style.cursor = 'pointer';
+        card.style.transition = 'all 0.2s ease';
+        card.addEventListener('mouseenter', () => card.style.backgroundColor = 'rgba(0,0,0,0.03)');
+        card.addEventListener('mouseleave', () => card.style.backgroundColor = '');
     });
 
     // Toggle navbar

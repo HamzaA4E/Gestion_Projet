@@ -12,6 +12,14 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// First, verify the is_admin column exists
+try {
+    $pdo->query("SELECT is_admin FROM project_members LIMIT 1");
+} catch (PDOException $e) {
+    // If column doesn't exist, add it
+    $pdo->exec("ALTER TABLE project_members ADD COLUMN is_admin TINYINT(1) DEFAULT 0");
+}
+
 // Get project data
 try {
     $project_id = $_GET['id'];
@@ -41,10 +49,17 @@ try {
     $stmt->execute([$project['creator_id']]);
     $users = $stmt->fetchAll();
 
-    // Get existing members (excluding creator)
+    // Get existing members (including creator for count)
+    $stmt = $pdo->prepare("SELECT user_id FROM project_members WHERE project_id = ?");
+    $all_members = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // Get non-admin members for checkbox selection
     $stmt = $pdo->prepare("SELECT user_id FROM project_members WHERE project_id = ? AND user_id != ?");
     $stmt->execute([$project_id, $project['creator_id']]);
     $selected_members = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // Store member count in session for feedback
+    $_SESSION['member_count'] = count($all_members);
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -56,6 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $deadline = $_POST['deadline'];
         $status = $_POST['status'];
         $new_members = $_POST['members'] ?? [];
+
+        // Start transaction
+        $pdo->beginTransaction();
 
         // Update project
         $stmt = $pdo->prepare("UPDATE projects SET 
@@ -74,25 +92,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$project_id, $project['creator_id']]);
 
         // Insert new members (excluding creator)
-        if (!empty($_POST['members'])) {
+        if (!empty($new_members)) {
             $stmt = $pdo->prepare("INSERT IGNORE INTO project_members 
                                  (project_id, user_id, is_admin) 
                                  VALUES (?, ?, 0)");
-            foreach ($_POST['members'] as $user_id) {
+            foreach ($new_members as $user_id) {
                 if ($user_id != $project['creator_id']) {
                     $stmt->execute([$project_id, $user_id]);
                 }
             }
         }
 
-        $_SESSION['success'] = "Project updated successfully";
-        header("Location: index.php");
-        exit();
+        // Get updated member count
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM project_members WHERE project_id = ?");
+        $stmt->execute([$project_id]);
+        $member_count = $stmt->fetchColumn();
 
+        $pdo->commit();
+        $_SESSION['success'] = "Project updated successfully! Team members: " . $member_count;
         header("Location: index.php");
         exit();
     } catch (PDOException $e) {
-        $error = "Error: " . $e->getMessage();
+        $pdo->rollBack();
+        $error = "Error updating project: " . $e->getMessage();
     }
 }
 ?>
@@ -104,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Edit Project</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
@@ -159,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <!-- Team Members Section -->
                             <div class="mb-4">
-                                <label class="form-label">Team Members</label>
+                                <label class="form-label">Team Members (Current: <?= $_SESSION['member_count'] ?? '0' ?>)</label>
                                 <div class="scrollable-checkbox-group border rounded p-3">
                                     <!-- Admin section -->
                                     <div class="mb-3 p-2 bg-light rounded">
@@ -179,8 +202,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 type="checkbox"
                                                 name="members[]"
                                                 value="<?= $user['id'] ?>"
+                                                id="member_<?= $user['id'] ?>"
                                                 <?= in_array($user['id'], $selected_members) ? 'checked' : '' ?>>
-                                            <label class="form-check-label">
+                                            <label class="form-check-label" for="member_<?= $user['id'] ?>">
                                                 <?= htmlspecialchars($user['username']) ?>
                                             </label>
                                         </div>

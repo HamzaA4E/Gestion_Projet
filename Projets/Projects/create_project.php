@@ -10,8 +10,16 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// First, verify the is_admin column exists
 try {
-    // Get all users except the current user
+    $pdo->query("SELECT is_admin FROM project_members LIMIT 1");
+} catch (PDOException $e) {
+    // If column doesn't exist, add it
+    $pdo->exec("ALTER TABLE project_members ADD COLUMN is_admin TINYINT(1) DEFAULT 0");
+}
+
+try {
+    // Get all users except current user (since creator is automatically added as admin)
     $stmt = $pdo->prepare("SELECT id, username FROM users WHERE id != ?");
     $stmt->execute([$_SESSION['user_id']]);
     $users = $stmt->fetchAll();
@@ -28,34 +36,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $members = $_POST['members'] ?? [];
         $creator_id = $_SESSION['user_id'];
 
+        // Start transaction
+        $pdo->beginTransaction();
+
         // Insert project
         $stmt = $pdo->prepare("INSERT INTO projects (title, description, deadline, status, creator_id) 
                              VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$title, $description, $deadline, $status, $creator_id]);
         $project_id = $pdo->lastInsertId();
 
-        try {
-            // Always add creator as admin
-            $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, is_admin) VALUES (?, ?, 1)");
-            $stmt->execute([$project_id, $creator_id]);
+        // Add creator as admin
+        $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, is_admin) VALUES (?, ?, 1)");
+        $stmt->execute([$project_id, $creator_id]);
 
-            // Add other members (0 = regular member)
-            if (!empty($members)) {
-                $stmt = $pdo->prepare("INSERT IGNORE INTO project_members (project_id, user_id, is_admin) VALUES (?, ?, 0)");
-                foreach ($members as $user_id) {
-                    if ($user_id != $creator_id) {
-                        $stmt->execute([$project_id, $user_id]);
-                    }
+        // Add other members
+        if (!empty($members)) {
+            $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, is_admin) VALUES (?, ?, 0)");
+            foreach ($members as $user_id) {
+                if ($user_id != $creator_id) {
+                    $stmt->execute([$project_id, $user_id]);
                 }
             }
-
-            header("Location: index.php");
-            exit();
-        } catch (PDOException $e) {
-            $error = "Error adding team members: " . $e->getMessage();
         }
+
+        $pdo->commit();
+        $_SESSION['success'] = "Project created successfully with " . (count($members) + 1) . " members";
+        header("Location: index.php");
+        exit();
     } catch (PDOException $e) {
-        $error = "Error: " . $e->getMessage();
+        $pdo->rollBack();
+        $error = "Error creating project: " . $e->getMessage();
     }
 }
 ?>
@@ -67,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Create Project</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
@@ -112,14 +123,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
 
-                            <div class="mb-3">
+                            <!-- Team Members -->
+                            <div class="mb-4">
                                 <label class="form-label">Team Members</label>
-                                <div class="scrollable-checkbox-group">
+                                <div class="scrollable-checkbox-group border rounded p-3">
+                                    <div class="mb-3 p-2 bg-light rounded">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" checked disabled>
+                                            <label class="form-check-label fw-bold text-primary">
+                                                <i class="fas fa-crown me-2"></i>
+                                                <?= htmlspecialchars($_SESSION['username'] ?? 'You') ?> (Admin)
+                                            </label>
+                                        </div>
+                                    </div>
                                     <?php foreach ($users as $user): ?>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="members[]"
-                                                value="<?= $user['id'] ?>" id="user<?= $user['id'] ?>">
-                                            <label class="form-check-label" for="user<?= $user['id'] ?>">
+                                            <input class="form-check-input" type="checkbox"
+                                                name="members[]"
+                                                value="<?= $user['id'] ?>"
+                                                id="user-<?= $user['id'] ?>">
+                                            <label class="form-check-label" for="user-<?= $user['id'] ?>">
                                                 <?= htmlspecialchars($user['username']) ?>
                                             </label>
                                         </div>
@@ -127,9 +150,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
 
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                                <a href="index.php" class="btn btn-secondary px-4">Cancel</a>
-                                <button type="submit" class="btn btn-primary px-4">
+                            <!-- Buttons -->
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="index.php" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save me-2"></i>Create Project
                                 </button>
                             </div>
