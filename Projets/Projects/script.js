@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Only proceed if not clicking on delete/edit buttons or their children
             if (!e.target.closest('.delete-project-btn') && !e.target.closest('.edit-button')) {
                 const projectId = this.closest('.col-md-4').querySelector('.delete-project-btn').getAttribute('data-project-id');
-                window.location.href = `./Tasks/index.php?project_id=${projectId}`;
+                window.location.href = `Gestion_Projet/Tasks/index.php?project_id=${projectId}`;
             }
         });
         
