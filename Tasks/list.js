@@ -55,22 +55,25 @@ async function loadTasks() {
 
 async function loadTasksFromDB() {
     try {
-        const response = await fetch('api/tasks.php?table=test', { // Modification ici
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
-        }
+        const response = await fetch('api/tasks.php?table=test');
+        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
         
         const data = await response.json();
-        console.log('Tâches chargées depuis la table test:', data);
+        console.log('Données brutes reçues:', data); // Debug
+        
+        // Vérifiez le format des dates
+        data.forEach(task => {
+            console.log(`Tâche ${task.id}:`, {
+                title: task.title,
+                deadline_date: task.deadline_date,
+                deadline_time: task.deadline_time,
+                raw_date: `${task.deadline_date}T${task.deadline_time || '00:00'}`
+            });
+        });
+        
         return data;
     } catch (error) {
-        console.error('Erreur lors du chargement depuis la DB:', error);
+        console.error('Erreur lors du chargement:', error);
         return [];
     }
 }
@@ -80,16 +83,16 @@ function createTaskElement(task) {
     taskElement.className = 'task-item';
     taskElement.id = 'task-' + task.id;
     
-    // Stockage des données dans les attributs
-    taskElement.dataset.deadlineDate = task.deadline_date && task.deadline_date !== '0000-00-00' ? task.deadline_date : '';
-    taskElement.dataset.deadlineTime = task.deadline_time || '23:59';
+    // Stockage des données
+    taskElement.dataset.deadlineDate = task.deadline_date || '';
+    taskElement.dataset.deadlineTime = task.deadline_time || '';
     taskElement.dataset.comments = JSON.stringify(task.comments || []);
 
-    // Construction du HTML selon votre structure exacte
+    // Construction du HTML
     taskElement.innerHTML = `
         <div class="task-header">
-            <h5>${task.title}</h5>
-            <span class="task-status">${task.status || ''}</span>
+            <h5>${task.title || 'Nouvelle tâche'}</h5>
+            <span class="task-status">${task.status || 'backlog'}</span>
         </div>
         <div class="task-description">
             <p>${task.description || ''}</p>
@@ -105,16 +108,33 @@ function createTaskElement(task) {
 
 // Fonction helper pour formater la date
 function formatDeadline(date, time) {
-    if (!date || date === '0000-00-00') return 'Pas de date limite';
-    
-    const formattedDate = new Date(`${date}T${time || '23:59'}`);
-    return formattedDate.toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    // Vérifier si la date est valide et non vide
+    if (!date || date === '0000-00-00' || date === '1970-01-01') {
+        return 'Pas de date limite';
+    }
+
+    try {
+        // Convertir la date au format ISO (ajout du time si nécessaire)
+        const dateStr = time ? `${date}T${time}` : `${date}T00:00:00`;
+        const formattedDate = new Date(dateStr);
+        
+        // Vérifier que la date est valide
+        if (isNaN(formattedDate.getTime())) {
+            console.warn('Date invalide:', date, time);
+            return 'Date invalide';
+        }
+
+        return formattedDate.toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (e) {
+        console.error('Erreur de formatage de date:', e);
+        return 'Date invalide';
+    }
 }
 // FONCTIONS DE RECHERCHE
 function initializeSearch() {
@@ -225,29 +245,38 @@ function initializeAddTaskButtons() {
 
 function setupTaskEditing() {
     document.addEventListener('click', function(event) {
+        // Vérifier si on clique sur une tâche existante
         const taskElement = event.target.closest('.task-item');
-        
-        if (taskElement && 
-            !event.target.closest('.move-up') && 
-            !event.target.closest('.move-down') && 
-            !event.target.closest('.delete-task')) {
-            
-            // Récupération sécurisée des données
-            const header = taskElement.querySelector('.task-header');
-            const description = taskElement.querySelector('.task-description');
-            
-            const taskData = {
-                title: header?.querySelector('h5')?.textContent || '',
-                description: description?.querySelector('p')?.textContent || '',
-                deadlineDate: taskElement.dataset.deadlineDate || '',
-                deadlineTime: taskElement.dataset.deadlineTime || '23:59',
-                comments: JSON.parse(taskElement.dataset.comments || '[]')
-            };
-            
-            window.taskBeingEdited = taskElement;
-            showTaskPopup('Modifier la tâche', taskElement);
+        if (!taskElement) return;
+
+        // Ignorer les clics sur les éléments d'action
+        if (event.target.closest('.move-up, .move-down, .delete-task')) {
+            return;
         }
+
+        // Rafraîchir la référence de la tâche à chaque clic
+        window.taskBeingEdited = taskElement;
+        
+        // Charger les données à partir du DOM actuel
+        loadTaskDataForPopup(taskElement);
     });
+}
+
+function loadTaskDataForPopup(taskElement) {
+    // Vérification complète de l'existence des éléments
+    const getSafeText = (selector) => 
+        taskElement.querySelector(selector)?.textContent?.trim() || '';
+
+    const taskData = {
+        title: getSafeText('.task-header h5'),
+        description: getSafeText('.task-description p'),
+        status: getSafeText('.task-status'),
+        deadlineDate: taskElement.dataset.deadlineDate || '',
+        deadlineTime: taskElement.dataset.deadlineTime || '23:59',
+        comments: JSON.parse(taskElement.dataset.comments || '[]')
+    };
+
+    showTaskPopup('Modifier la tâche', taskData);
 }
 
 function createNewTask(title, description, commentText, deadlineDate, deadlineTime) {
@@ -422,32 +451,16 @@ function ensurePopupOverlayExists() {
     return popupOverlay;
 }
 
-function showTaskPopup(title, taskElement = null) {
+function showTaskPopup(title, taskData) {
+    // Fermer tout popup existant
+    closePopup();
+    
     const popupOverlay = document.getElementById('popupOverlay');
-    
-    if (!popupOverlay) {
-        console.error("L'élément popupOverlay n'existe pas dans le DOM");
-        return;
-    }
-    
-    const popupContent = createPopupHTML(title, taskElement);
-    
-    if (!popupContent) {
-        console.error("Erreur lors de la génération du contenu du popup");
-        return;
-    }
-    
-    popupOverlay.innerHTML = popupContent;
+    popupOverlay.innerHTML = createPopupHTML(title, taskData);
     popupOverlay.classList.add('active');
-    document.body.classList.add('popup-open');
     
-    setTimeout(() => {
-        const firstInput = popupOverlay.querySelector('input');
-        if (firstInput) firstInput.focus();
-    }, 100);
-    
-    window.taskBeingEdited = taskElement;
-    setupPopupEventListeners(taskElement ? 'edit' : 'add');
+    // Stocker les données plutôt que l'élément DOM
+    window.currentTaskData = taskData;
 }
 
 function createPopupHTML(title, taskElement = null) {
@@ -633,10 +646,14 @@ function closePopup() {
     if (popupOverlay) {
         popupOverlay.classList.remove('active');
         document.body.classList.remove('popup-open');
+        popupOverlay.innerHTML = ''; // Nettoyer le contenu
     }
     
+    // Réinitialiser complètement la référence
+    if (window.taskBeingEdited) {
+        window.taskBeingEdited = null;
+    }
     currentTaskColumn = null;
-    window.taskBeingEdited = null;
     temporaryComments = [];
 }
 
@@ -658,9 +675,6 @@ function saveTask() {
 }
 
 function updateTask() {
-    const taskElement = window.taskBeingEdited;
-    if (!taskElement) return;
-
     const popupOverlay = document.getElementById('popupOverlay');
     if (!popupOverlay) return;
 
@@ -672,11 +686,20 @@ function updateTask() {
         return;
     }
 
-    if (taskElement.querySelector('.task-title')) {
-        taskElement.querySelector('.task-title').textContent = title;
-    }
-    if (taskElement.querySelector('.task-description')) {
-        taskElement.querySelector('.task-description').textContent = description;
+    // Trouver la tâche à mettre à jour dans le DOM
+    const taskId = window.currentTaskData.id; // Supposons que vous avez un ID
+    const taskElement = document.getElementById(`task-${taskId}`);
+    
+    if (taskElement) {
+        // Mettre à jour les éléments du DOM directement
+        const titleElement = taskElement.querySelector('.task-header h5');
+        const descElement = taskElement.querySelector('.task-description p');
+        
+        if (titleElement) titleElement.textContent = title;
+        if (descElement) descElement.textContent = description;
+        
+        // Mettre à jour les data-attributs si nécessaire
+        taskElement.dataset.lastUpdated = new Date().toISOString();
     }
 
     closePopup();

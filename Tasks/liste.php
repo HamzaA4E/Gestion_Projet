@@ -97,19 +97,23 @@
             </div>
 
             <div class="container-fluid py-4">
-                <div id="task-list-container" class="task-list-container">
-                <div class="task-item">
-    <div class="task-header">
-        <h5>Titre de la tâche</h5>
-    </div>
-    <div class="task-description">
-        <p>Description de la tâche</p>
-    </div>
-    
-</div>
-                    <!-- Les tâches seront chargées dynamiquement ici -->
-                </div>
+    <div id="task-list-container" class="task-list-container">
+        <!-- Exemple de structure de tâche COMPLÈTE -->
+        <div class="task-item">
+            <div class="task-header">
+                <h5>Titre de la tâche</h5>
+                <span class="task-status">Status</span>
             </div>
+            <div class="task-description">
+                <p>Description de la tâche</p>
+            </div>
+            <div class="task-footer">
+                <span class="deadline">Date limite</span>
+                <span class="comments-count">0 commentaires</span>
+            </div>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 
