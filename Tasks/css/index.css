@@ -573,12 +573,35 @@ body {
     overflow: hidden;
 }
 
-.deadline-container {
+/* .deadline-container {
     display: flex;
     align-items: center;
     gap: 10px;
     padding-top: 12px;
     padding-bottom: 12px;
+} */
+
+.deadline-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin: 15px 0;
+    background: linear-gradient(145deg, #f8f9fa, #ffffff);
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    border-left: 4px solid #e2c64a;
+    transition: all 0.3s ease;
+}
+
+
+
+.deadline-label {
+    font-weight: 600;
+    color: #4a4a4a;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    min-width: 80px;
 }
 
 @media (max-width: 767.98px) {
@@ -591,27 +614,48 @@ body {
     }
 }
 
-.deadline-label {
+/* .deadline-label {
     font-size: 14px;
     color: #495057;
     font-weight: 500;
+} */
+
+.deadline-label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
-.deadline-date, .deadline-time {
+/* .deadline-date, .deadline-time {
     padding: 6px 12px;
     border: 1px solid #ced4da;
     border-radius: 6px;
     font-size: 14px;
+} */
+
+.deadline-date,
+.deadline-time {
+    padding: 10px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    flex-grow: 1;
 }
 
-.deadline-date:focus, .deadline-time:focus {
+.deadline-date:focus,
+.deadline-time:focus {
     outline: none;
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2),
+                inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .form-field {
-    display: flex;
+    
     gap: 12px;
     margin-bottom: 16px;
 }
@@ -791,7 +835,7 @@ body {
 }
 
 .description-header {
-    display: flex;
+  
     align-items: center;
     gap: 10px;
 }

@@ -121,10 +121,7 @@
                     <div class="InProgress shadow-sm rounded-3">
                         <h4 class="p-3 rounded-top-3">In Progress</h4>
                         <div class="p-3 task-container">
-                            <div class="add-task-btn">
-                                <pre class="b6 d-flex fs-2 align-items-center justify-content-center rounded-3">+</pre>
-                            </div>
-                            <div class="column-empty-area"></div>
+                           
                         </div>
                     </div>
                 </div>
@@ -133,10 +130,7 @@
                     <div class="Completed shadow-sm rounded-3">
                         <h4 class="p-3 rounded-top-3">Completed</h4>
                         <div class="p-3 task-container">
-                            <div class="add-task-btn">
-                                <pre class="b6 d-flex fs-2 align-items-center justify-content-center rounded-3">+</pre>
-                            </div>
-                            <div class="column-empty-area"></div>
+                           
                         </div>
                     </div>
                 </div>
