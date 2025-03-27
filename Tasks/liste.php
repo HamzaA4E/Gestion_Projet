@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="Boostarp/css/bootstrap.min.css" />
     <link rel="stylesheet" href="Boostarp/css/all.min.css" />
-    <link rel="stylesheet" href="css/view2.css">
+    <link rel="stylesheet" href="css/view.css">
     <title>AProjectO</title>
 </head>
 
@@ -85,14 +85,28 @@
         <div class="Content w-100 container-fluid">
             <div class="d-flex align-items-center justify-content-between pt-5">
                 <h5 class="ms-2 text-black-50">Tasks</h5>
-                <select aria-label="Type de vue" class="me-5 select-view" id="viewSelector">
-                    <option value="colonne">Colonne</option>
-                    <option value="liste" selected>Liste</option>
-                </select>
+                <div class="d-flex align-items-center gap-3">
+                    <button id="createTaskBtn" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Créer une tâche
+                    </button>
+                    <select aria-label="Type de vue" class="select-view" id="viewSelector">
+                        <option value="colonne">Colonne</option>
+                        <option value="liste" selected>Liste</option>
+                    </select>
+                </div>
             </div>
 
             <div class="container-fluid py-4">
                 <div id="task-list-container" class="task-list-container">
+                <div class="task-item">
+    <div class="task-header">
+        <h5>Titre de la tâche</h5>
+    </div>
+    <div class="task-description">
+        <p>Description de la tâche</p>
+    </div>
+    
+</div>
                     <!-- Les tâches seront chargées dynamiquement ici -->
                 </div>
             </div>
@@ -104,6 +118,12 @@
     
     <script src="Boostarp/js/bootstrap.bundle.min.js"></script>
     <script src="list.js"></script>
+    
+    <script>
+    // Remplacer la gestion existante du popup par une redirection simple
+    document.getElementById('createTaskBtn').addEventListener('click', function() {
+        window.location.href = 'http://localhost/Gestion_Projet/Tasks/create_task.php';
+    });
+</script>
 </body>
-
 </html>

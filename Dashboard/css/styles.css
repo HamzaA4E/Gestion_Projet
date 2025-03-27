@@ -84,6 +84,7 @@ body {
 }
 #iduser_name{
     display: inline;
+    margin-right: 10px;
 }
 .img_prof {
     width: 40px;

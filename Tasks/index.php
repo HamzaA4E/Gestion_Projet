@@ -1,3 +1,21 @@
+<?php
+// Démarrer la session
+session_start();
+
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Inclure les fichiers nécessaires
+require_once __DIR__ . '/../Dashboard/includes/config.php';
+require_once __DIR__ . '/../Dashboard/includes/functions.php';
+
+// Récupérer les informations de l'utilisateur
+$user_id = $_SESSION['user_id'];
+$user = getUserById($user_id);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,10 +32,15 @@
 <body>
     <nav class="navbar justify-content-between container-fluid py-2">
         <a class="navbar-brand fs-3" href="#">AProjectO</a>
-        <form class="form-inline d-flex gap-2">
-            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-dark" type="submit">Search</button>
-        </form>
+        <div id="em2">
+                
+        <h6 id="iduser_name"><?php echo isset($user['prenom']) && isset($user['nom']) ? htmlspecialchars($user['prenom'] . ' ' . $user['nom']) : ''; ?></h6>
+<a href="/Gestion_Projet/Dashboard/profile.php" id="profile-link">
+    <img src="<?php echo isset($user['profile_image']) && !empty($user['profile_image']) ? htmlspecialchars($user['profile_image']) : '/Gestion_Projet/Dashboard/img/default-avatar.jpg'; ?>" 
+         alt="image de profil" 
+         class="img_prof">
+</a>
+            </div>
     </nav>
   
     <div class="d-flex flex-lg-row flex-column">

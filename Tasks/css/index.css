@@ -30,6 +30,15 @@ body {
     box-sizing: border-box;
 }
 
+
+.img_prof {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 /* Barre de navigation */
 .navbar {
     background-color: var(--navbar-bg);
@@ -1279,4 +1288,9 @@ body.popup-open {
         padding: 0.5rem 1.5rem 0.5rem 0.75rem;
         font-size: 13px;
     }
+}
+
+#iduser_name{
+    display: inline;
+    margin-right: 10px;
 }

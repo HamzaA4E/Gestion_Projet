@@ -286,3 +286,15 @@ function hasAccess($resource_id, $resource_type, $user_id) {
     
     return $stmt->fetchColumn() > 0;
 }
+
+function getAllUsers() {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->query("SELECT id, nom, prenom FROM users ORDER BY nom, prenom");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Erreur lors de la récupération des utilisateurs: " . $e->getMessage());
+        return [];
+    }
+}

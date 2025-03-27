@@ -74,7 +74,7 @@ $pending_invitations = getPendingInvitations($user_id);
     <link rel="stylesheet" href="Boostarp/css/all.min.css" />
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/styles.css">
-    <!-- <link rel="stylesheet" href="css/groups.css"> -->
+    <link rel="stylesheet" href="css/groups.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
