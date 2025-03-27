@@ -42,6 +42,7 @@ async function loadTasks() {
         }
 
         taskListContainer.innerHTML = '';
+        taskCounter = tasks.length;
 
         tasks.forEach(task => {
             const taskElement = createTaskElement(task);
@@ -54,7 +55,7 @@ async function loadTasks() {
 
 async function loadTasksFromDB() {
     try {
-        const response = await fetch('api/tasks.php', {
+        const response = await fetch('api/tasks.php?table=test', { // Modification ici
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -66,7 +67,7 @@ async function loadTasksFromDB() {
         }
         
         const data = await response.json();
-        console.log('Tâches chargées:', data);
+        console.log('Tâches chargées depuis la table test:', data);
         return data;
     } catch (error) {
         console.error('Erreur lors du chargement depuis la DB:', error);
@@ -79,32 +80,41 @@ function createTaskElement(task) {
     taskElement.className = 'task-item';
     taskElement.id = 'task-' + task.id;
     
-    // Gestion des dates invalides
-    const hasValidDate = task.deadline_date && task.deadline_date !== '0000-00-00';
-    taskElement.dataset.deadlineDate = hasValidDate ? task.deadline_date : '';
+    // Stockage des données dans les attributs
+    taskElement.dataset.deadlineDate = task.deadline_date && task.deadline_date !== '0000-00-00' ? task.deadline_date : '';
     taskElement.dataset.deadlineTime = task.deadline_time || '23:59';
     taskElement.dataset.comments = JSON.stringify(task.comments || []);
-    
-    // Formater la date si elle existe
-    const deadline = hasValidDate 
-        ? new Date(task.deadline_date + 'T' + (task.deadline_time || '23:59')).toLocaleString('fr-FR')
-        : 'Pas de date limite';
-    
+
+    // Construction du HTML selon votre structure exacte
     taskElement.innerHTML = `
         <div class="task-header">
             <h5>${task.title}</h5>
-            <span class="task-status">${task.status}</span>
+            <span class="task-status">${task.status || ''}</span>
         </div>
         <div class="task-description">
             <p>${task.description || ''}</p>
         </div>
         <div class="task-footer">
-            <span class="deadline">${deadline}</span>
+            <span class="deadline">${formatDeadline(task.deadline_date, task.deadline_time)}</span>
             <span class="comments-count">${task.comments ? task.comments.length : 0} commentaires</span>
         </div>
     `;
     
     return taskElement;
+}
+
+// Fonction helper pour formater la date
+function formatDeadline(date, time) {
+    if (!date || date === '0000-00-00') return 'Pas de date limite';
+    
+    const formattedDate = new Date(`${date}T${time || '23:59'}`);
+    return formattedDate.toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 // FONCTIONS DE RECHERCHE
 function initializeSearch() {
@@ -222,18 +232,19 @@ function setupTaskEditing() {
             !event.target.closest('.move-down') && 
             !event.target.closest('.delete-task')) {
             
-            // Récupérer les données de la tâche
+            // Récupération sécurisée des données
+            const header = taskElement.querySelector('.task-header');
+            const description = taskElement.querySelector('.task-description');
+            
             const taskData = {
-                title: taskElement.querySelector('h5').textContent,
-                description: taskElement.querySelector('.task-description p').textContent,
+                title: header?.querySelector('h5')?.textContent || '',
+                description: description?.querySelector('p')?.textContent || '',
                 deadlineDate: taskElement.dataset.deadlineDate || '',
                 deadlineTime: taskElement.dataset.deadlineTime || '23:59',
                 comments: JSON.parse(taskElement.dataset.comments || '[]')
             };
             
-            // Stocker la référence à la tâche en cours d'édition
             window.taskBeingEdited = taskElement;
-            
             showTaskPopup('Modifier la tâche', taskElement);
         }
     });
