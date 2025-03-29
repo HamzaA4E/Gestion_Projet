@@ -44,6 +44,7 @@ $tasks = $stmt->fetchAll();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -63,7 +64,7 @@ $tasks = $stmt->fetchAll();
     </nav>
 
     <div class="d-flex">
-    <div class="sidebar px-3">
+        <div class="sidebar px-3">
             <ul class="ulSidebar ">
             <div class="d-flex">
     <i class="fa-solid fa-gauge"></i>
@@ -81,7 +82,14 @@ $tasks = $stmt->fetchAll();
        Projects
     </a>
 </div>
-
+<div class="d-flex" id="tasksBtn">
+    <i class="fa-solid fa-square-check"></i>
+    <a href="/Gestion_Projet/Tasks/index.php" 
+       class="Tasks fs-5 fw-bold"
+       style="text-decoration: none; color: inherit;">
+       Tasks
+    </a>
+</div>
 <div class="d-flex">
     <i class="fa-solid fa-comment"></i>
     <a href="/Gestion_Projet/Dashboard/group_chat.php" 
@@ -99,23 +107,23 @@ $tasks = $stmt->fetchAll();
     </a>
 </div>
 
-                
-<div class="d-flex">
-    <i class="fa-solid fa-gears"></i>
-    <a href="/Gestion_Projet/Dashboard/profile.php" 
-       class="Settings fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Settings
-    </a>
-</div>
-<div class="d-flex">
-<i class="fa-solid fa-right-from-bracket"></i>
-    <a href="/Gestion_Projet/Dashboard/php/logout.php" 
-       class="Settings fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Déconnexion
-    </a>
-</div>
+
+                <div class="d-flex">
+                    <i class="fa-solid fa-gears"></i>
+                    <a href="/Gestion_Projet/Dashboard/profile.php"
+                        class="Settings fs-5 fw-bold"
+                        style="text-decoration: none; color: inherit;">
+                        Settings
+                    </a>
+                </div>
+                <div class="d-flex">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <a href="/Gestion_Projet/Dashboard/php/logout.php"
+                        class="Settings fs-5 fw-bold"
+                        style="text-decoration: none; color: inherit;">
+                        Déconnexion
+                    </a>
+                </div>
             </ul>
         </div>
 
@@ -137,68 +145,20 @@ $tasks = $stmt->fetchAll();
             
             <div class="container-fluid py-4">
     <div id="task-list-container" class="task-list-container">
-        <?php if (empty($tasks)): ?>
-            <div class="alert alert-info">Aucune tâche trouvée pour ce projet.</div>
-        <?php else: ?>
-            <?php foreach ($tasks as $task): ?>
-                <div class="task-item mb-3 p-3 border rounded">
-                    <div class="task-header d-flex justify-content-between align-items-center">
-                        <h5><?php echo htmlspecialchars($task['title']); ?></h5>
-                        <span class="badge 
-                            <?php 
-                                switch($task['status']) {
-                                    case 'Completed': echo 'bg-success'; break;
-                                    case 'In Progress': echo 'bg-warning text-dark'; break;
-                                    default: echo 'bg-secondary';
-                                }
-                            ?>">
-                            <?php echo htmlspecialchars($task['status']); ?>
-                        </span>
-                    </div>
-                    
-                    <div class="task-description my-2">
-                        <p><?php echo htmlspecialchars($task['description']); ?></p>
-                    </div>
-                    
-                    <div class="task-footer d-flex justify-content-between text-muted small">
-                        <div>
-                            <span class="deadline">
-                                <i class="fas fa-calendar-day me-1"></i>
-                                <?php echo date('d/m/Y', strtotime($task['due_date'])); ?>
-                            </span>
-                            <?php if ($task['assigned_to']): ?>
-                                <span class="ms-3">
-                                    <i class="fas fa-user me-1"></i>
-                                    <?php 
-                                        echo htmlspecialchars(
-                                            $task['assigned_firstname'] . ' ' . 
-                                            $task['assigned_lastname']
-                                        ); 
-                                    ?>
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div>
-                            <span class="priority me-2">
-                                <i class="fas fa-flag me-1"></i>
-                                <?php 
-                                    switch($task['priority']) {
-                                        case 'high': echo 'Élevée'; break;
-                                        case 'medium': echo 'Moyenne'; break;
-                                        default: echo 'Faible';
-                                    }
-                                ?>
-                            </span>
-                            <span class="comments-count">
-                                <i class="fas fa-comment me-1"></i>
-                                0 commentaires
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+        <!-- Exemple de structure de tâche COMPLÈTE -->
+        <div class="task-item">
+            <div class="task-header">
+                <h5>Titre de la tâche</h5>
+                <span class="task-status">Status</span>
+            </div>
+            <div class="task-description">
+                <p>Description de la tâche</p>
+            </div>
+            <div class="task-footer">
+                <span class="deadline">Date limite</span>
+                <span class="comments-count">0 commentaires</span>
+            </div>
+        </div>
     </div>
 </div>
         </div>
@@ -206,22 +166,16 @@ $tasks = $stmt->fetchAll();
 
     <!-- Popup Overlay -->
     <div id="popupOverlay" class="popup-overlay"></div>
-    
+
     <script src="Boostarp/js/bootstrap.bundle.min.js"></script>
-    <!-- <script src="lists.js"></script> -->
+    <script src="list.js"></script>
     
     <script>
-document.getElementById('createTaskBtn').addEventListener('click', function() {
-    // Get project_id from current URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const projectId = urlParams.get('project_id');
-    
-    if (projectId) {
-        window.location.href = `http://localhost/Gestion_Projet/Tasks/create_task.php?project_id=${projectId}`;
-    } else {
-        console.error("Project ID not found in URL");
-    }
-});
+    // Remplacer la gestion existante du popup par une redirection simple
+    document.getElementById('createTaskBtn').addEventListener('click', function() {
+        window.location.href = 'http://localhost/Gestion_Projet/Tasks/create_task.php';
+    });
 </script>
 </body>
+
 </html>
