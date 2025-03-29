@@ -1,3 +1,47 @@
+<?php
+session_start();
+require 'db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: /Gestion_Projet/Dashboard/login.php");
+    exit();
+}
+
+// Get the project ID from URL
+$project_id = $_GET['project_id'] ?? null;
+if (!$project_id) {
+    die("Project ID is required");
+}
+
+// Verify user has access to this project
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM projects p 
+                      LEFT JOIN project_members pm ON p.id = pm.project_id
+                      WHERE p.id = ? AND (p.creator_id = ? OR pm.user_id = ?)");
+$stmt->execute([$project_id, $_SESSION['user_id'], $_SESSION['user_id']]);
+if (!$stmt->fetchColumn()) {
+    die("You don't have access to this project");
+}
+
+// Get project details
+$stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ?");
+$stmt->execute([$project_id]);
+$project = $stmt->fetch();
+
+// AJOUTEZ VOTRE CODE ICI (début)
+// Get tasks for this project with additional info
+$stmt = $pdo->prepare("SELECT t.*, 
+                      u.prenom AS assigned_firstname, 
+                      u.nom AS assigned_lastname,
+                      p.title AS project_title
+                      FROM tasks t
+                      LEFT JOIN users u ON t.assigned_to = u.id
+                      LEFT JOIN projects p ON t.project_id = p.id
+                      WHERE t.project_id = ?");
+$stmt->execute([$project_id]);
+$tasks = $stmt->fetchAll();
+// AJOUTEZ VOTRE CODE ICI (fin)
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,9 +130,9 @@
             <div class="d-flex align-items-center justify-content-between pt-5">
                 <h5 class="ms-2 text-black-50">Tasks</h5>
                 <div class="d-flex align-items-center gap-3">
-                    <button id="createTaskBtn" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Créer une tâche
-                    </button>
+                <button id="createTaskBtn" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Créer une tâche
+                </button>
                     <select aria-label="Type de vue" class="select-view" id="viewSelector">
                         <option value="colonne">Colonne</option>
                         <option value="liste" selected>Liste</option>
@@ -96,22 +140,72 @@
                 </div>
             </div>
 
+
+            
             <div class="container-fluid py-4">
     <div id="task-list-container" class="task-list-container">
-        <!-- Exemple de structure de tâche COMPLÈTE -->
-        <div class="task-item">
-            <div class="task-header">
-                <h5>Titre de la tâche</h5>
-                <span class="task-status">Status</span>
-            </div>
-            <div class="task-description">
-                <p>Description de la tâche</p>
-            </div>
-            <div class="task-footer">
-                <span class="deadline">Date limite</span>
-                <span class="comments-count">0 commentaires</span>
-            </div>
-        </div>
+        <?php if (empty($tasks)): ?>
+            <div class="alert alert-info">Aucune tâche trouvée pour ce projet.</div>
+        <?php else: ?>
+            <?php foreach ($tasks as $task): ?>
+                <div class="task-item mb-3 p-3 border rounded">
+                    <div class="task-header d-flex justify-content-between align-items-center">
+                        <h5><?php echo htmlspecialchars($task['title']); ?></h5>
+                        <span class="badge 
+                            <?php 
+                                switch($task['status']) {
+                                    case 'Completed': echo 'bg-success'; break;
+                                    case 'In Progress': echo 'bg-warning text-dark'; break;
+                                    default: echo 'bg-secondary';
+                                }
+                            ?>">
+                            <?php echo htmlspecialchars($task['status']); ?>
+                        </span>
+                    </div>
+                    
+                    <div class="task-description my-2">
+                        <p><?php echo htmlspecialchars($task['description']); ?></p>
+                    </div>
+                    
+                    <div class="task-footer d-flex justify-content-between text-muted small">
+                        <div>
+                            <span class="deadline">
+                                <i class="fas fa-calendar-day me-1"></i>
+                                <?php echo date('d/m/Y', strtotime($task['due_date'])); ?>
+                            </span>
+                            <?php if ($task['assigned_to']): ?>
+                                <span class="ms-3">
+                                    <i class="fas fa-user me-1"></i>
+                                    <?php 
+                                        echo htmlspecialchars(
+                                            $task['assigned_firstname'] . ' ' . 
+                                            $task['assigned_lastname']
+                                        ); 
+                                    ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div>
+                            <span class="priority me-2">
+                                <i class="fas fa-flag me-1"></i>
+                                <?php 
+                                    switch($task['priority']) {
+                                        case 'high': echo 'Élevée'; break;
+                                        case 'medium': echo 'Moyenne'; break;
+                                        default: echo 'Faible';
+                                    }
+                                ?>
+                            </span>
+                            <span class="comments-count">
+                                <i class="fas fa-comment me-1"></i>
+                                0 commentaires
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </div>
         </div>
@@ -121,13 +215,20 @@
     <div id="popupOverlay" class="popup-overlay"></div>
     
     <script src="Boostarp/js/bootstrap.bundle.min.js"></script>
-    <script src="list.js"></script>
+    <!-- <script src="lists.js"></script> -->
     
     <script>
-    // Remplacer la gestion existante du popup par une redirection simple
-    document.getElementById('createTaskBtn').addEventListener('click', function() {
-        window.location.href = 'http://localhost/Gestion_Projet/Tasks/create_task.php';
-    });
+document.getElementById('createTaskBtn').addEventListener('click', function() {
+    // Get project_id from current URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project_id');
+    
+    if (projectId) {
+        window.location.href = `http://localhost/Gestion_Projet/Tasks/create_task.php?project_id=${projectId}`;
+    } else {
+        console.error("Project ID not found in URL");
+    }
+});
 </script>
 </body>
 </html>

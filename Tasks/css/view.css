@@ -1028,3 +1028,31 @@ body {
         margin-top: 10px;
     }
 }
+.task-item {
+    background-color: white;
+    transition: var(--transition);
+    margin-bottom: 15px;
+}
+
+.task-item:hover {
+    box-shadow: var(--box-shadow);
+    transform: translateY(-2px);
+}
+
+.task-header h5 {
+    color: var(--dark-color);
+    margin-bottom: 0;
+}
+
+.task-description {
+    color: var(--text-medium);
+}
+
+.task-footer {
+    font-size: 0.9rem;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}

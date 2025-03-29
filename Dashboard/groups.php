@@ -153,14 +153,7 @@ foreach ($user_groups as $group) {
        Projects
     </a>
 </div>
-<div class="d-flex" id="tasksBtn">
-    <i class="fa-solid fa-square-check"></i>
-    <a href="/Gestion_Projet/Tasks/index.php" 
-       class="Tasks fs-5 fw-bold"
-       style="text-decoration: none; color: inherit;">
-       Tasks
-    </a>
-</div>
+
 <div class="d-flex">
     <i class="fa-solid fa-comment"></i>
     <a href="/Gestion_Projet/Dashboard/group_chat.php" 

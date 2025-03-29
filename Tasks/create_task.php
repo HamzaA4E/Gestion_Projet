@@ -1,46 +1,75 @@
 <?php
 session_start();
-require_once __DIR__ . '/../Dashboard/includes/config.php';
-require_once __DIR__ . '/../Dashboard/includes/functions.php';
+require '../Dashboard/includes/config.php';
+require '../Dashboard/includes/functions.php';
 
-// Vérifier l'authentification
+// Vérification de l'authentification
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../Dashboard/login.php');
     exit;
 }
 
-// Récupérer tous les utilisateurs pour l'assignation
-$users = getAllUsers(); // Vous devez implémenter cette fonction dans functions.php
+// Récupération et validation de l'ID du projet
+$project_id = (int)($_GET['project_id'] ?? 0);
+if ($project_id <= 0) {
+    header('Location: liste.php');
+    exit;
+}
+
+// Vérification du projet et des accès
+$project = getProjectById($project_id);
+if (!$project || !hasAccess($project_id, 'project', $_SESSION['user_id'])) {
+    header('Location: liste.php');
+    exit;
+}
+
+// Récupération des utilisateurs
+$users = getAllUsers();
 
 // Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title']);
-    $description = trim($_POST['description']);
-    $due_date = $_POST['due_date'];
-    $priority = $_POST['priority'];
-    $status = 'backlog'; // Statut par défaut
-    $assigned_to = $_POST['assigned_to'];
+    // Nettoyage des données
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $due_date = $_POST['due_date'] ?? null;
+    $priority = $_POST['priority'] ?? 'medium';
+    $status = 'Backlog';
+    $assigned_to = $_POST['assigned_to'] ?? null;
     $created_by = $_SESSION['user_id'];
 
     // Validation
     if (empty($title)) {
         $error = "Le titre de la tâche est obligatoire";
     } else {
-        // Création de la tâche
-        $stmt = $pdo->prepare("INSERT INTO test (title, description, due_date, priority, status, assigned_to, created_by) 
-                              VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $success = $stmt->execute([$title, $description, $due_date, $priority, $status, $assigned_to, $created_by]);
+        try {
+            // Préparation de la requête
+            $stmt = $pdo->prepare("INSERT INTO tasks 
+                (title, description, due_date, priority, status, assigned_to, project_id, created_by) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                
+            // Exécution avec les paramètres
+            $success = $stmt->execute([
+                $title, 
+                $description, 
+                $due_date, 
+                $priority, 
+                $status, 
+                $assigned_to,
+                $project_id, 
+                $created_by
+            ]);
 
-        if ($success) {
-            header('Location: http://localhost/Gestion_Projet/Tasks/liste.php');
-            exit;
-        } else {
-            $error = "Erreur lors de la création de la tâche";
+            if ($success) {
+                header("Location: liste.php?project_id=$project_id");
+                exit;
+            }
+        } catch (PDOException $e) {
+            $error = "Erreur lors de la création de la tâche: " . $e->getMessage();
+            error_log($e->getMessage());
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -237,6 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         justify-content: space-between;
         margin-top: 30px;
     }
+    
 </style>
 </head>
 <body>
@@ -274,6 +304,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="high">Élevée</option>
                     </select>
                 </div>
+                <div class="mb-3">
+    <label class="form-label">Projet</label>
+    <div class="form-control-plaintext">
+        <strong><?php echo htmlspecialchars($project['title']); ?></strong>
+        <input type="hidden" name="project_id" value="<?php echo $project_id; ?>">
+    </div>
+</div>
 
                 <div class="mb-3">
                     <label for="assigned_to" class="form-label">Assigner à</label>

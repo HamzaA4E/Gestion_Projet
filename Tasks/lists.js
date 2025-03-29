@@ -32,80 +32,191 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // FONCTIONS DE CHARGEMENT
 async function loadTasks() {
+    const taskListContainer = document.getElementById('task-list-container');
+    
+    if (!taskListContainer) {
+        console.error('Conteneur des tâches introuvable');
+        return;
+    }
+
+    // Afficher un indicateur de chargement
+    taskListContainer.innerHTML = `
+        <div class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Chargement des tâches...</p>
+        </div>
+    `;
+
     try {
         const tasks = await loadTasksFromDB();
-        const taskListContainer = document.getElementById('task-list-container');
         
-        if (!taskListContainer) {
-            console.error('Conteneur des tâches introuvable');
+        // Vérifier si des tâches ont été retournées
+        if (!tasks || tasks.length === 0) {
+            taskListContainer.innerHTML = `
+                <div class="alert alert-info">
+                    Aucune tâche trouvée pour ce projet.
+                </div>
+            `;
             return;
         }
 
+        // Utiliser DocumentFragment pour de meilleures performances
+        const fragment = document.createDocumentFragment();
+        
+        tasks.forEach(task => {
+            try {
+                const taskElement = createTaskElement(task);
+                fragment.appendChild(taskElement);
+            } catch (e) {
+                console.error('Erreur création élément tâche:', e, task);
+            }
+        });
+
+        // Remplacer le contenu en une opération
         taskListContainer.innerHTML = '';
+        taskListContainer.appendChild(fragment);
+        
+        // Mettre à jour le compteur
         taskCounter = tasks.length;
 
-        tasks.forEach(task => {
-            const taskElement = createTaskElement(task);
-            taskListContainer.appendChild(taskElement);
-        });
     } catch (error) {
         console.error('Erreur chargement tâches:', error);
+        
+        // Afficher un message d'erreur convivial
+        taskListContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <p>Impossible de charger les tâches</p>
+                <button class="btn-retry" onclick="loadTasks()">
+                    <i class="fas fa-sync-alt"></i> Réessayer
+                </button>
+                <details>
+                    <summary>Détails techniques</summary>
+                    <code>${error.message}</code>
+                </details>
+            </div>
+        `;
     }
 }
 
 async function loadTasksFromDB() {
     try {
-        const response = await fetch('api/tasks.php?table=test');
-        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+        // 1. Récupérer l'ID du projet depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('project_id');
         
-        const data = await response.json();
-        console.log('Données brutes reçues:', data); // Debug
+        if (!projectId) {
+            throw new Error("ID de projet manquant dans l'URL");
+        }
+
+        // 2. Appel API avec timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         
-        // Vérifiez le format des dates
-        data.forEach(task => {
-            console.log(`Tâche ${task.id}:`, {
-                title: task.title,
-                deadline_date: task.deadline_date,
-                deadline_time: task.deadline_time,
-                raw_date: `${task.deadline_date}T${task.deadline_time || '00:00'}`
-            });
+        const response = await fetch(`/Gestion_Projet/Tasks/get_task.php?project_id=${projectId}`, {
+            signal: controller.signal
         });
         
-        return data;
+        clearTimeout(timeoutId);
+
+        // 3. Vérifier la réponse
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+
+        // 4. Parser et valider les données
+        const data = await response.json();
+        
+        if (!data.success || !Array.isArray(data.tasks)) {
+            throw new Error("Format de réponse invalide");
+        }
+
+        console.log("Tâches chargées:", data.tasks);
+        return data.tasks;
+
     } catch (error) {
-        console.error('Erreur lors du chargement:', error);
+        console.error("Erreur de chargement:", error);
+        
+        // Afficher un message d'erreur à l'utilisateur
+        const container = document.getElementById('task-list-container');
+        if (container) {
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    Échec du chargement: ${error.message}
+                    <button onclick="window.location.reload()">Réessayer</button>
+                </div>
+            `;
+        }
+        
         return [];
     }
 }
-
 function createTaskElement(task) {
     const taskElement = document.createElement('div');
     taskElement.className = 'task-item';
     taskElement.id = 'task-' + task.id;
+    taskElement.dataset.taskId = task.id;
     
-    // Stockage des données
+    // Stocker les données
     taskElement.dataset.deadlineDate = task.deadline_date || '';
     taskElement.dataset.deadlineTime = task.deadline_time || '';
-    taskElement.dataset.comments = JSON.stringify(task.comments || []);
+    taskElement.dataset.status = task.status || 'Backlog';
+    taskElement.dataset.priority = task.priority || 'medium';
 
     // Construction du HTML
     taskElement.innerHTML = `
         <div class="task-header">
             <h5>${task.title || 'Nouvelle tâche'}</h5>
-            <span class="task-status">${task.status || 'backlog'}</span>
+            <span class="task-status ${getStatusClass(task.status)}">
+                ${task.status || 'Backlog'}
+            </span>
         </div>
         <div class="task-description">
             <p>${task.description || ''}</p>
         </div>
         <div class="task-footer">
             <span class="deadline">${formatDeadline(task.deadline_date, task.deadline_time)}</span>
-            <span class="comments-count">${task.comments ? task.comments.length : 0} commentaires</span>
+            ${task.assigned_firstname ? `
+            <span class="assigned-to">
+                <i class="fas fa-user"></i>
+                ${task.assigned_firstname} ${task.assigned_lastname}
+            </span>
+            ` : ''}
+            <span class="priority-badge ${getPriorityClass(task.priority)}">
+                ${getPriorityText(task.priority)}
+            </span>
         </div>
     `;
     
     return taskElement;
 }
 
+// Helper functions
+function getStatusClass(status) {
+    const statusClasses = {
+        'Completed': 'status-completed',
+        'In Progress': 'status-in-progress',
+        'Backlog': 'status-backlog'
+    };
+    return statusClasses[status] || '';
+}
+
+function getPriorityClass(priority) {
+    const priorityClasses = {
+        'high': 'priority-high',
+        'medium': 'priority-medium',
+        'low': 'priority-low'
+    };
+    return priorityClasses[priority] || '';
+}
+
+function getPriorityText(priority) {
+    const priorityTexts = {
+        'high': 'Élevée',
+        'medium': 'Moyenne',
+        'low': 'Faible'
+    };
+    return priorityTexts[priority] || priority;
+}
 // Fonction helper pour formater la date
 function formatDeadline(date, time) {
     // Vérifier si la date est valide et non vide
@@ -245,23 +356,170 @@ function initializeAddTaskButtons() {
 
 function setupTaskEditing() {
     document.addEventListener('click', function(event) {
-        // Vérifier si on clique sur une tâche existante
+        // Vérifier si on clique sur une tâche (ou ses enfants)
         const taskElement = event.target.closest('.task-item');
         if (!taskElement) return;
 
-        // Ignorer les clics sur les éléments d'action
-        if (event.target.closest('.move-up, .move-down, .delete-task')) {
+        // Ne pas ouvrir le popup si on clique sur un élément interactif
+        if (event.target.closest('.task-actions, .move-up, .move-down, .delete-task')) {
             return;
         }
 
-        // Rafraîchir la référence de la tâche à chaque clic
-        window.taskBeingEdited = taskElement;
-        
-        // Charger les données à partir du DOM actuel
-        loadTaskDataForPopup(taskElement);
+        // Charger les données de la tâche
+        const taskData = {
+            id: taskElement.dataset.taskId,
+            title: taskElement.querySelector('.task-header h5').textContent,
+            description: taskElement.querySelector('.task-description p').textContent,
+            status: taskElement.dataset.status,
+            priority: taskElement.dataset.priority,
+            deadlineDate: taskElement.dataset.deadlineDate,
+            deadlineTime: taskElement.dataset.deadlineTime,
+            // Ajoutez d'autres champs au besoin
+        };
+
+        // Afficher le popup
+        showEditTaskPopup(taskData, taskElement);
     });
 }
 
+function showEditTaskPopup(taskData, taskElement) {
+    // Créer le HTML du popup
+    const popupHTML = `
+        <div class="task-edit-popup">
+            <div class="popup-header">
+                <h3>Modifier la tâche</h3>
+                <span class="close-popup">&times;</span>
+            </div>
+            <div class="popup-content">
+                <div class="form-group">
+                    <label>Titre</label>
+                    <input type="text" id="edit-task-title" value="${escapeHtml(taskData.title)}">
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="edit-task-description">${escapeHtml(taskData.description)}</textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="edit-task-status">
+                            <option value="Backlog" ${taskData.status === 'Backlog' ? 'selected' : ''}>Backlog</option>
+                            <option value="In Progress" ${taskData.status === 'In Progress' ? 'selected' : ''}>En cours</option>
+                            <option value="Completed" ${taskData.status === 'Completed' ? 'selected' : ''}>Terminé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Priorité</label>
+                        <select id="edit-task-priority">
+                            <option value="low" ${taskData.priority === 'low' ? 'selected' : ''}>Faible</option>
+                            <option value="medium" ${taskData.priority === 'medium' ? 'selected' : ''}>Moyenne</option>
+                            <option value="high" ${taskData.priority === 'high' ? 'selected' : ''}>Élevée</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Date limite</label>
+                    <input type="date" id="edit-task-deadline" value="${taskData.deadlineDate || ''}">
+                    <input type="time" id="edit-task-time" value="${taskData.deadlineTime || '23:59'}">
+                </div>
+            </div>
+            <div class="popup-actions">
+                <button class="btn-save">Enregistrer</button>
+                <button class="btn-cancel">Annuler</button>
+            </div>
+        </div>
+    `;
+
+    // Afficher le popup
+    const popupOverlay = document.getElementById('popupOverlay');
+    popupOverlay.innerHTML = popupHTML;
+    popupOverlay.classList.add('active');
+
+    // Stocker la référence à la tâche
+    popupOverlay.dataset.editingTaskId = taskData.id;
+
+    // Gestion des événements
+    setupEditPopupEvents(taskElement);
+}
+function setupEditPopupEvents(taskElement) {
+    const popupOverlay = document.getElementById('popupOverlay');
+    
+    // Bouton de fermeture
+    popupOverlay.querySelector('.close-popup').addEventListener('click', () => {
+        popupOverlay.classList.remove('active');
+    });
+
+    // Bouton Annuler
+    popupOverlay.querySelector('.btn-cancel').addEventListener('click', () => {
+        popupOverlay.classList.remove('active');
+    });
+
+    // Bouton Enregistrer
+    popupOverlay.querySelector('.btn-save').addEventListener('click', () => {
+        saveTaskChanges(taskElement);
+    });
+}
+
+async function saveTaskChanges(taskElement) {
+    const popupOverlay = document.getElementById('popupOverlay');
+    
+    // Récupérer les valeurs modifiées
+    const updatedTask = {
+        id: popupOverlay.dataset.editingTaskId,
+        title: popupOverlay.querySelector('#edit-task-title').value,
+        description: popupOverlay.querySelector('#edit-task-description').value,
+        status: popupOverlay.querySelector('#edit-task-status').value,
+        priority: popupOverlay.querySelector('#edit-task-priority').value,
+        deadlineDate: popupOverlay.querySelector('#edit-task-deadline').value,
+        deadlineTime: popupOverlay.querySelector('#edit-task-time').value
+    };
+
+    try {
+        // Envoyer les modifications au serveur
+        const response = await fetch('/Gestion_Projet/Tasks/api/update_task.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedTask)
+        });
+
+        if (!response.ok) throw new Error('Échec de la mise à jour');
+
+        // Mettre à jour l'affichage
+        updateTaskElement(taskElement, updatedTask);
+        
+        // Fermer le popup
+        popupOverlay.classList.remove('active');
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la mise à jour de la tâche');
+    }
+}
+
+function updateTaskElement(taskElement, newData) {
+    // Mettre à jour le DOM
+    taskElement.querySelector('.task-header h5').textContent = newData.title;
+    taskElement.querySelector('.task-description p').textContent = newData.description;
+    taskElement.querySelector('.task-status').textContent = newData.status;
+    
+    // Mettre à jour les classes CSS pour le statut
+    taskElement.querySelector('.task-status').className = `task-status ${getStatusClass(newData.status)}`;
+    
+    // Mettre à jour les data-attributs
+    taskElement.dataset.status = newData.status;
+    taskElement.dataset.priority = newData.priority;
+    taskElement.dataset.deadlineDate = newData.deadlineDate;
+    taskElement.dataset.deadlineTime = newData.deadlineTime;
+    
+    // Mettre à jour la date affichée
+    taskElement.querySelector('.deadline').textContent = formatDeadline(newData.deadlineDate, newData.deadlineTime);
+}
 function loadTaskDataForPopup(taskElement) {
     // Vérification complète de l'existence des éléments
     const getSafeText = (selector) => 

@@ -9,6 +9,11 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Get user information
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
 // Get projects where user is either creator or member
 $stmt = $pdo->prepare("SELECT p.* FROM projects p
                       LEFT JOIN project_members pm ON p.id = pm.project_id
@@ -29,16 +34,176 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="Boostarp/css/bootstrap.min.css" />
     <link rel="stylesheet" href="Boostarp/css/all.min.css" />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Variables CSS pour une meilleure maintenabilité */
+        :root {
+            --primary-bg: #f8f9fa;
+            --sidebar-bg: hsl(0, 15%, 91%);
+            --navbar-bg: hsl(0, 4%, 86%);
+            --text-dark: #0B3051;
+            --text-medium: #5D7285;
+            --text-light: #6c757d;
+            --border-color: #e0e0e0;
+            --blue-accent: #0085ad;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+            --transition-base: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Navbar styles */
+        .navbar {
+            background-color: var(--navbar-bg);
+            box-shadow: var(--shadow-sm);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .navbar>a {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 1.5rem;
+            text-decoration: none;
+        }
+
+        #em2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #iduser_name {
+            display: inline;
+            margin-right: 10px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .img_prof {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 250px;
+            min-height: 100vh;
+            margin-top: 72px;
+        }
+
+        .ulSidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-left: 0;
+            list-style-type: none;
+            margin: 0;
+        }
+
+        .ulSidebar>.d-flex {
+            color: var(--text-medium);
+            font-family: 'Poppins', sans-serif;
+            line-height: 21.954px;
+            letter-spacing: 0.146px;
+            transition: var(--transition-base);
+            position: relative;
+            cursor: pointer;
+            list-style: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .ulSidebar>.d-flex:hover {
+            color: hsl(234, 71%, 61%);
+            background-color: rgba(234, 71%, 61%, 0.1);
+            transform: translateX(5px);
+        }
+
+        .ulSidebar>.d-flex:hover::after {
+            content: "";
+            position: absolute;
+            height: 1px;
+            width: 80%;
+            left: 10%;
+            background-color: hsl(234, 71%, 54%);
+            bottom: 0;
+        }
+
+        .ulSidebar>.d-flex i {
+            margin-right: 0;
+            font-size: 18px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 180px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                padding: 15px;
+            }
+
+            .ulSidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-around;
+                gap: 10px;
+            }
+
+            .ulSidebar>.d-flex {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px;
+            }
+
+            .navbar-brand {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <nav class="navbar justify-content-between container-fluid py-2">
         <a class="navbar-brand fs-3" href="#">AProjectO</a>
-        <form class="form-inline d-flex gap-2">
-            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-dark" type="submit">Search</button>
-        </form>
+        <div id="em2">
+            <h6 id="iduser_name"><?php echo isset($user['prenom']) && isset($user['nom']) ? htmlspecialchars($user['prenom'] . ' ' . $user['nom']) : ''; ?></h6>
+            <a href="/Gestion_Projet/Dashboard/profile.php" id="profile-link">
+                <img src="<?php echo isset($user['profile_image']) && !empty($user['profile_image']) ? htmlspecialchars($user['profile_image']) : '/Gestion_Projet/Dashboard/img/default-avatar.jpg'; ?>"
+                    alt="image de profil"
+                    class="img_prof">
+            </a>
+        </div>
     </nav>
 
     <div class="d-flex flex-lg-row flex-column">
@@ -60,14 +225,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         Projects
                     </a>
                 </div>
-                <div class="d-flex" id="tasksBtn">
-                    <i class="fa-solid fa-square-check"></i>
-                    <a href="/Gestion_Projet/Tasks/index.php"
-                        class="Tasks fs-5 fw-bold"
-                        style="text-decoration: none; color: inherit;">
-                        Tasks
-                    </a>
-                </div>
+
                 <div class="d-flex">
                     <i class="fa-solid fa-comment"></i>
                     <a href="/Gestion_Projet/Dashboard/group_chat.php"
@@ -84,7 +242,6 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         Groupes
                     </a>
                 </div>
-
 
                 <div class="d-flex">
                     <i class="fa-solid fa-gears"></i>
@@ -149,7 +306,8 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $is_creator = ($project['creator_id'] == $_SESSION['user_id']);
                         $is_member = !$is_creator;
                         ?>
-                        <div class="col-md-4 mb-4" onclick="window.location='./Tasks/index.php?project_id=<?= $project['id'] ?>'">
+                        <!-- In your project card div, change the onclick handler -->
+                        <div class="col-md-4 mb-4" onclick="window.location='/Gestion_Projet/Tasks/liste.php?project_id=<?= $project['id'] ?>'">
                             <div class="project-card position-relative">
                                 <div class="project-card-header">
                                     <h3 class="project-title"><?= htmlspecialchars($project['title']) ?></h3>

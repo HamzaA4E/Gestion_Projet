@@ -148,6 +148,29 @@ function getRecentProjects($user_id, $limit = 5) {
  * @param int $limit Nombre maximum de tâches à récupérer
  * @return array Liste des tâches
  */
+
+ function getProjects() {
+    global $pdo;
+    try {
+        $stmt = $pdo->query("SELECT id, name FROM projects ORDER BY name");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error fetching projects: " . $e->getMessage());
+        return [];
+    }
+}
+
+function getProjectById($project_id) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ?");
+        $stmt->execute([$project_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error fetching project: " . $e->getMessage());
+        return false;
+    }
+}
 function getPendingTasks($user_id, $limit = 5) {
     global $pdo;
     
@@ -163,6 +186,24 @@ function getPendingTasks($user_id, $limit = 5) {
     
     return $stmt->fetchAll();
 }
+function getProjectTasks($project_id) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("SELECT t.*, 
+                             u.prenom AS assigned_firstname, 
+                             u.nom AS assigned_lastname
+                             FROM tasks t
+                             LEFT JOIN users u ON t.assigned_to = u.id
+                             WHERE t.project_id = ?
+                             ORDER BY t.due_date ASC");
+        $stmt->execute([$project_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error fetching tasks: " . $e->getMessage());
+        return [];
+    }
+}
 
 /**
  * Récupère les statistiques des tâches d'un utilisateur
@@ -175,10 +216,9 @@ function getTasksStats($user_id) {
     
     $stmt = $pdo->prepare("
         SELECT 
-            SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed,
-            SUM(CASE WHEN t.status = 'on_hold' THEN 1 ELSE 0 END) as on_hold,
-            SUM(CASE WHEN t.status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
-            SUM(CASE WHEN t.status = 'pending' THEN 1 ELSE 0 END) as pending
+            SUM(CASE WHEN t.status = 'Completed' THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN t.status = 'Backlog' THEN 1 ELSE 0 END) as backlog,
+            SUM(CASE WHEN t.status = 'In Progress' THEN 1 ELSE 0 END) as in_progress
         FROM tasks t
         JOIN projects p ON t.project_id = p.id
         WHERE t.assigned_to = ? OR p.creator_id = ?
