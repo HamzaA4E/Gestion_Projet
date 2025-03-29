@@ -196,30 +196,77 @@ function getProjectTasks($project_id) {
  * @param int $user_id ID de l'utilisateur
  * @return array Statistiques des tâches
  */
+function getProjectById($project_id) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ?");
+        $stmt->execute([$project_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error fetching project: " . $e->getMessage());
+        return false;
+    }
+}
 
+function getProjectTasksWithDetails($project_id) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("SELECT t.*, 
+                             u.prenom AS assigned_firstname, 
+                             u.nom AS assigned_lastname,
+                             p.title AS project_title
+                             FROM tasks t
+                             LEFT JOIN users u ON t.assigned_to = u.id
+                             LEFT JOIN projects p ON t.project_id = p.id
+                             WHERE t.project_id = ?");
+        $stmt->execute([$project_id]);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        error_log("Error fetching tasks: " . $e->getMessage());
+        return [];
+    }
+}
+function getProjects() {
+    global $pdo;
+    try {
+        $stmt = $pdo->query("SELECT id, name FROM projects ORDER BY name");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error fetching projects: " . $e->getMessage());
+        return [];
+    }
+}
 function getAllProjects()
 {
     global $pdo;
     $stmt = $pdo->query("SELECT id, nom FROM projects ORDER BY nom");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function getTasksStats($user_id)
-{
+function getTasksStats($user_id) {
     global $pdo;
-
-    $stmt = $pdo->prepare("
-        SELECT 
-            SUM(CASE WHEN t.status = 'Completed' THEN 1 ELSE 0 END) as completed,
-            SUM(CASE WHEN t.status = 'Backlog' THEN 1 ELSE 0 END) as backlog,
-            SUM(CASE WHEN t.status = 'In Progress' THEN 1 ELSE 0 END) as in_progress
-        FROM tasks t
-        JOIN projects p ON t.project_id = p.id
-        WHERE t.assigned_to = ? OR p.creator_id = ?
-    ");
-
-    $stmt->execute([$user_id, $user_id]);
-
-    return $stmt->fetch();
+    
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 
+                SUM(CASE WHEN t.status = 'Completed' THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN t.status = 'Backlog' THEN 1 ELSE 0 END) as backlog,
+                SUM(CASE WHEN t.status = 'In Progress' THEN 1 ELSE 0 END) as in_progress
+            FROM tasks t
+            JOIN projects p ON t.project_id = p.id
+            WHERE t.assigned_to = ? OR p.creator_id = ?
+        ");
+        
+        $stmt->execute([$user_id, $user_id]);
+        return $stmt->fetch();
+    } catch (PDOException $e) {
+        error_log("Error in getTasksStats: " . $e->getMessage());
+        return [
+            'completed' => 0,
+            'backlog' => 0,
+            'in_progress' => 0
+        ];
+    }
 }
 
 /**

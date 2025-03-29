@@ -27,10 +27,7 @@ if (!$project || !hasAccess($project_id, 'project', $_SESSION['user_id'])) {
 $users = getAllUsers();
 
 // Traitement du formulaire
-// Traitement du formulaire
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-<<<<<<< HEAD
     // Nettoyage des données
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -39,22 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status = 'Backlog';
     $assigned_to = $_POST['assigned_to'] ?? null;
     $created_by = $_SESSION['user_id'];
-=======
-    $titre = trim($_POST['titre'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $date_echeance = $_POST['date_echeance'] ?? null;
-    $priorite = $_POST['priorite'] ?? 'moyenne';
-    $status = 'pending';
-    $assigned_to = $_POST['assigned_to'] ?? null;
-    $project_id = $_POST['project_id'] ?? null;
-    $date_debut = $_POST['date_debut'] ?? null;
->>>>>>> d97dc71ac2b5d73e408ee0e2638554dc7b92bd81
 
-    if (empty($titre)) {
+    // Validation
+    if (empty($title)) {
         $error = "Le titre de la tâche est obligatoire";
     } else {
         try {
-<<<<<<< HEAD
             // Préparation de la requête
             $stmt = $pdo->prepare("INSERT INTO tasks 
                 (title, description, due_date, priority, status, assigned_to, project_id, created_by) 
@@ -74,33 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($success) {
                 header("Location: liste.php?project_id=$project_id");
-=======
-            $stmt = $pdo->prepare("INSERT INTO tasks 
-                (titre, description, date_echeance, priorite, status, assigned_to, project_id, date_debut, date_creation) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-
-            $success = $stmt->execute([
-                $titre,
-                $description,
-                $date_echeance,
-                $priorite,
-                $status,
-                $assigned_to,
-                $project_id,
-                $date_debut
-            ]);
-
-            if ($success) {
-                header('Location: http://localhost/Gestion_Projet/Tasks/liste.php');
->>>>>>> d97dc71ac2b5d73e408ee0e2638554dc7b92bd81
                 exit;
             }
         } catch (PDOException $e) {
             $error = "Erreur lors de la création de la tâche: " . $e->getMessage();
-<<<<<<< HEAD
             error_log($e->getMessage());
-=======
->>>>>>> d97dc71ac2b5d73e408ee0e2638554dc7b92bd81
         }
     }
 }
@@ -206,7 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
         }
 
-<<<<<<< HEAD
     /* Style pour le conteneur des boutons */
     .button-container {
         display: flex;
@@ -215,126 +179,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
 </style>
-=======
-        textarea.form-control {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: var(--border-radius);
-            font-weight: 500;
-            transition: var(--transition);
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
-            transform: translateY(-2px);
-        }
-
-        .alert {
-            border-radius: var(--border-radius);
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-
-        /* Animation pour les champs requis */
-        input:required,
-        select:required {
-            border-left: 3px solid var(--primary-color);
-        }
-
-        /* Style pour la date */
-        input[type="date"] {
-            position: relative;
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            background: transparent;
-            bottom: 0;
-            color: transparent;
-            cursor: pointer;
-            height: auto;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .form-container {
-                margin: 20px 15px;
-                padding: 20px;
-            }
-
-            h2 {
-                font-size: 1.5rem;
-            }
-        }
-
-        /* Effet de chargement */
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Style pour les options du select */
-        option {
-            padding: 10px;
-        }
-
-        /* Style pour le conteneur des boutons */
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-    </style>
->>>>>>> d97dc71ac2b5d73e408ee0e2638554dc7b92bd81
 </head>
 
 <body>
@@ -351,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
                 <div class="mb-3">
                     <label for="title" class="form-label">Titre *</label>
-                    <input type="text" class="form-control" id="titre" name="titre" required>
+                    <input type="text" class="form-control" id="titre" name="title" required>
                 </div>
 
                 <div class="mb-3">
@@ -361,12 +205,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="mb-3">
                     <label for="due_date" class="form-label">Date d'échéance</label>
-                    <input type="date" class="form-control" id="date_echeance" name="date_echeance">
+                    <input type="date" class="form-control" id="date_echeance" name="due_date">
                 </div>
 
                 <div class="mb-3">
                     <label for="priority" class="form-label">Priorité</label>
-                    <select class="form-select" id="priorite" name="priorite">
+                    <select class="form-select" id="priorite" name="priority">
                         <option value="basse">Faible</option>
                         <option value="moyenne" selected>Moyenne</option>
                         <option value="haute">Élevée</option>
@@ -376,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="mb-3">
     <label class="form-label">Projet</label>
     <div class="form-control-plaintext">
-        <strong><?php echo htmlspecialchars($project['title']); ?></strong>
+        <strong><?php echo htmlspecialchars($project['title'] ?? $project['name'] ?? 'Projet inconnu'); ?></strong>
         <input type="hidden" name="project_id" value="<?php echo $project_id; ?>">
     </div>
 </div>

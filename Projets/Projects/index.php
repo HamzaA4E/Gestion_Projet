@@ -34,11 +34,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="Boostarp/css/bootstrap.min.css" />
     <link rel="stylesheet" href="Boostarp/css/all.min.css" />
-<<<<<<< HEAD
     <link rel="stylesheet" href="styles.css">
-=======
-    <link rel="stylesheet" href="style.css">
->>>>>>> d97dc71ac2b5d73e408ee0e2638554dc7b92bd81
     <style>
         /* Variables CSS pour une meilleure maintenabilité */
         :root {
@@ -310,7 +306,8 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $is_creator = ($project['creator_id'] == $_SESSION['user_id']);
                         $is_member = !$is_creator;
                         ?>
-                        <div class="col-md-4 mb-4" onclick="window.location='/Gestion_Projet/Tasks/liste.php ?>'">
+                        <!-- In your project card div, change the onclick handler -->
+                        <div class="col-md-4 mb-4" onclick="window.location='/Gestion_Projet/Tasks/liste.php?project_id=<?= $project['id'] ?>'">
                             <div class="project-card position-relative">
                                 <div class="project-card-header">
                                     <h3 class="project-title"><?= htmlspecialchars($project['title']) ?></h3>

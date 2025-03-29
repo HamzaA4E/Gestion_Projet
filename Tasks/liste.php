@@ -27,19 +27,14 @@ $stmt = $pdo->prepare("SELECT * FROM projects WHERE id = ?");
 $stmt->execute([$project_id]);
 $project = $stmt->fetch();
 
-// AJOUTEZ VOTRE CODE ICI (début)
-// Get tasks for this project with additional info
-$stmt = $pdo->prepare("SELECT t.*, 
-                      u.prenom AS assigned_firstname, 
-                      u.nom AS assigned_lastname,
-                      p.title AS project_title
+// Get tasks for this project
+// Get tasks for this project with assigned user info
+$stmt = $pdo->prepare("SELECT t.*, u.prenom as assigned_firstname, u.nom as assigned_lastname 
                       FROM tasks t
                       LEFT JOIN users u ON t.assigned_to = u.id
-                      LEFT JOIN projects p ON t.project_id = p.id
                       WHERE t.project_id = ?");
 $stmt->execute([$project_id]);
 $tasks = $stmt->fetchAll();
-// AJOUTEZ VOTRE CODE ICI (fin)
 ?>
 
 <!DOCTYPE html>
@@ -131,9 +126,9 @@ $tasks = $stmt->fetchAll();
             <div class="d-flex align-items-center justify-content-between pt-5">
                 <h5 class="ms-2 text-black-50">Tasks</h5>
                 <div class="d-flex align-items-center gap-3">
-                <button id="createTaskBtn" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Créer une tâche
-                </button>
+                <button id="createTaskBtn" class="btn btn-primary" data-project-id="<?php echo $_GET['project_id'] ?? ''; ?>">
+    <i class="fas fa-plus me-2"></i>Créer une tâche
+</button>
                     <select aria-label="Type de vue" class="select-view" id="viewSelector">
                         <option value="colonne">Colonne</option>
                         <option value="liste" selected>Liste</option>
@@ -145,20 +140,68 @@ $tasks = $stmt->fetchAll();
             
             <div class="container-fluid py-4">
     <div id="task-list-container" class="task-list-container">
-        <!-- Exemple de structure de tâche COMPLÈTE -->
-        <div class="task-item">
-            <div class="task-header">
-                <h5>Titre de la tâche</h5>
-                <span class="task-status">Status</span>
-            </div>
-            <div class="task-description">
-                <p>Description de la tâche</p>
-            </div>
-            <div class="task-footer">
-                <span class="deadline">Date limite</span>
-                <span class="comments-count">0 commentaires</span>
-            </div>
-        </div>
+        <?php if (empty($tasks)): ?>
+            <div class="alert alert-info">Aucune tâche trouvée pour ce projet.</div>
+        <?php else: ?>
+            <?php foreach ($tasks as $task): ?>
+                <div class="task-item mb-3 p-3 border rounded">
+                    <div class="task-header d-flex justify-content-between align-items-center">
+                        <h5><?php echo htmlspecialchars($task['title']); ?></h5>
+                        <span class="badge 
+                            <?php 
+                                switch($task['status']) {
+                                    case 'Completed': echo 'bg-success'; break;
+                                    case 'In Progress': echo 'bg-warning text-dark'; break;
+                                    default: echo 'bg-secondary';
+                                }
+                            ?>">
+                            <?php echo htmlspecialchars($task['status']); ?>
+                        </span>
+                    </div>
+                    
+                    <div class="task-description my-2">
+                        <p><?php echo htmlspecialchars($task['description']); ?></p>
+                    </div>
+                    
+                    <div class="task-footer d-flex justify-content-between text-muted small">
+                        <div>
+                            <span class="deadline">
+                                <i class="fas fa-calendar-day me-1"></i>
+                                <?php echo date('d/m/Y', strtotime($task['due_date'])); ?>
+                            </span>
+                            <?php if ($task['assigned_to']): ?>
+                                <span class="ms-3">
+                                    <i class="fas fa-user me-1"></i>
+                                    <?php 
+                                        echo htmlspecialchars(
+                                            $task['assigned_firstname'] . ' ' . 
+                                            $task['assigned_lastname']
+                                        ); 
+                                    ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div>
+                            <span class="priority me-2">
+                                <i class="fas fa-flag me-1"></i>
+                                <?php 
+                                    switch($task['priority']) {
+                                        case 'high': echo 'Élevée'; break;
+                                        case 'medium': echo 'Moyenne'; break;
+                                        default: echo 'Faible';
+                                    }
+                                ?>
+                            </span>
+                            <span class="comments-count">
+                                <i class="fas fa-comment me-1"></i>
+                                0 commentaires
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </div>
         </div>
@@ -168,13 +211,20 @@ $tasks = $stmt->fetchAll();
     <div id="popupOverlay" class="popup-overlay"></div>
 
     <script src="Boostarp/js/bootstrap.bundle.min.js"></script>
-    <script src="list.js"></script>
+    <script src="listss.js"></script>
     
     <script>
-    // Remplacer la gestion existante du popup par une redirection simple
-    document.getElementById('createTaskBtn').addEventListener('click', function() {
-        window.location.href = 'http://localhost/Gestion_Projet/Tasks/create_task.php';
-    });
+document.getElementById('createTaskBtn').addEventListener('click', function() {
+    const projectId = this.getAttribute('data-project-id');
+    if (projectId) {
+        window.location.href = `http://localhost/Gestion_Projet/Tasks/create_task.php?project_id=${projectId}`;
+    } else {
+        // Handle case where no project is selected (if applicable)
+        alert('Veuillez sélectionner un projet d\'abord');
+        // Or redirect to project selection:
+        // window.location.href = 'http://localhost/Gestion_Projet/Projets/Projects/index.php';
+    }
+});
 </script>
 </body>
 
