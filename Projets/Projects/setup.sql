@@ -1,7 +1,7 @@
 USE gestion_projets;
 
 -- Users Table with auto-generated username
-CREATE TABLE utilisateurs (
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(50) NOT NULL,
     prenom VARCHAR(50) NOT NULL,
@@ -38,9 +38,3 @@ CREATE TABLE IF NOT EXISTS project_members (
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
--- Insert test users (username auto-generated as "prenom.nom")
-INSERT IGNORE INTO users (nom, prenom, password, email) VALUES
-('Agrawal', 'Anima', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'anima@example.com'),
-('Dupont', 'Jean', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'jean@example.com'),
-('Curie', 'Marie', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'marie@example.com');
