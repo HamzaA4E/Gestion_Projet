@@ -7,20 +7,21 @@ CREATE DATABASE IF NOT EXISTS gestion_projets CHARACTER SET utf8mb4 COLLATE utf8
 USE gestion_projets;
 
 -- Table des utilisateurs
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    prenom VARCHAR(100) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    nom VARCHAR(50) NOT NULL,
+    prenom VARCHAR(50) NOT NULL,
+    username VARCHAR(100) GENERATED ALWAYS AS (CONCAT(nom, ' ', prenom)) STORED,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    telephone VARCHAR(20) DEFAULT NULL,
-    poste VARCHAR(100) DEFAULT NULL,
-    profile_image VARCHAR(255) DEFAULT NULL,
-    date_creation DATETIME NOT NULL,
-    date_modification DATETIME DEFAULT NULL,
-    derniere_connexion DATETIME DEFAULT NULL,
-    status ENUM('actif', 'inactif') NOT NULL DEFAULT 'actif'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    telephone VARCHAR(20),
+    poste VARCHAR(50),
+    profile_image VARCHAR(255),
+    date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_modification DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    derniere_connexion DATETIME,
+    statut ENUM('actif', 'inactif') NOT NULL DEFAULT 'actif'
+);
 
 -- Table des projets
 CREATE TABLE IF NOT EXISTS projects (
@@ -28,38 +29,37 @@ CREATE TABLE IF NOT EXISTS projects (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     deadline DATE,
-    status ENUM('en_cours', 'termine', 'en_pause', 'annule') NOT NULL DEFAULT 'en_cours',
+    status ENUM('Ongoing','On Hold','Completed') DEFAULT 'Ongoing',
     creator_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- Table des membres du projet
 CREATE TABLE IF NOT EXISTS project_members (
     project_id INT,
     user_id INT,
+    is_admin TINYINT(1) DEFAULT 0,
     PRIMARY KEY (project_id, user_id),
-    FOREIGN KEY (project_id) REFERENCES projects(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Table des tâches
-CREATE TABLE IF NOT EXISTS tasks (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    titre VARCHAR(255) NOT NULL,
-    description TEXT,
-    project_id INT NOT NULL,
-    assigned_to INT DEFAULT NULL,
-    status ENUM('pending', 'in_progress', 'on_hold', 'completed') NOT NULL DEFAULT 'pending',
-    priorite ENUM('basse', 'moyenne', 'haute', 'urgente') NOT NULL DEFAULT 'moyenne',
-    date_debut DATE,
-    date_echeance DATE,
-    date_completion DATE DEFAULT NULL,
-    date_creation DATETIME NOT NULL,
-    date_modification DATETIME DEFAULT NULL,
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tasks (
+    id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    project_id INT(11) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status ENUM('Backlog', 'In Progress', 'Complete') NOT NULL,
+    due_date DATE,
+    priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
+    assigned_to INT(11),
+    created_by INT(11) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
 
 -- Table des discussions
 CREATE TABLE IF NOT EXISTS discussions (
@@ -70,17 +70,6 @@ CREATE TABLE IF NOT EXISTS discussions (
     date_creation DATETIME NOT NULL,
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Table des favoris
-CREATE TABLE IF NOT EXISTS favorites (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    project_id INT NOT NULL,
-    date_ajout DATETIME NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_favorite (user_id, project_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Insertion d'un utilisateur de test (mot de passe: password123)
